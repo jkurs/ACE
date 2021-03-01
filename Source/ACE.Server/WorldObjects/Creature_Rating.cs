@@ -216,15 +216,26 @@ namespace ACE.Server.WorldObjects
 
             var augBonus = 0;
             var lumAugBonus = 0;
+            var allegianceBonus = 0;
+            
 
             if (this is Player player)
             {
+
+                if (player.HasAllegiance)
+                {
+                    var monarch = player.Allegiance.Monarch.Player;
+
+                    if(monarch.AllegianceBonusDamageRating.HasValue)
+                        allegianceBonus = (int)monarch.AllegianceBonusDamageRating;
+                }
+
                 augBonus = player.AugmentationDamageBonus * 3;
-                lumAugBonus = player.LumAugDamageRating;
+                lumAugBonus = player.LumAugDamageRating;                
             }
 
             // heritage / weapon type bonus factored in elsewhere?
-            return damageRating + equipment + enchantments - weaknessRating + augBonus + lumAugBonus;
+            return damageRating + equipment + enchantments - weaknessRating + augBonus + lumAugBonus + allegianceBonus;
         }
 
         public int GetDamageResistRating(CombatType? combatType = null, bool directDamage = true)
@@ -245,15 +256,24 @@ namespace ACE.Server.WorldObjects
             var augBonus = 0;
             var lumAugBonus = 0;
             var specBonus = 0;
+            var allegianceBonus = 0;
 
             if (this is Player player)
             {
+                if (player.HasAllegiance)
+                {
+                    var monarch = player.Allegiance.Monarch.Player;
+
+                    if (monarch.AllegianceBonusDamageResistRating.HasValue)
+                        allegianceBonus = (int)monarch.AllegianceBonusDamageResistRating;
+                }
+
                 augBonus = player.AugmentationDamageReduction * 3;
                 lumAugBonus = player.LumAugDamageReductionRating;
                 specBonus = GetSpecDefenseBonus(combatType);
             }
 
-            return damageResistRating + equipment + enchantments - netherDotDamageRating + augBonus + lumAugBonus + specBonus;
+            return damageResistRating + equipment + enchantments - netherDotDamageRating + augBonus + lumAugBonus + specBonus + allegianceBonus;
         }
 
         public float GetDamageResistRatingMod(CombatType? combatType = null, bool directDamage = true)
@@ -345,8 +365,11 @@ namespace ACE.Server.WorldObjects
             // additive enchantments
             var enchantments = EnchantmentManager.GetRating(PropertyInt.CritResistRating);
 
+            // equipment ratings
+            var equipment = GetEquippedItemsRatingSum(PropertyInt.GearCritResist);
+
             // no augs / lum augs?
-            return critResistRating + enchantments;
+            return critResistRating + enchantments + equipment;
         }
 
         public int GetCritDamageResistRating()

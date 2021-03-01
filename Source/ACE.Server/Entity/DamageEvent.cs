@@ -147,6 +147,40 @@ namespace ACE.Server.Entity
 
             var damage = damageEvent.DoCalculateDamage(attacker, defender, damageSource);
 
+            if (attacker != null)
+            {
+                var playerDefender = defender as Player;
+
+                if (playerDefender != null)
+                {
+                    var armormana = playerDefender.EquippedObjects;
+                    if (armormana != null)
+                    {
+                        foreach (var item in armormana)
+                        {
+                            if (item.Key != null && item.Value.ArmorMana.HasValue)
+                            {
+                                var rng2 = ThreadSafeRandom.Next(1, 5000);
+                                if (rng2 <= 1)
+                                {
+                                    item.Value.ArmorMana -= 1;
+                                    item.Value.LongDesc = $"Armor Mana: {item.Value.ArmorMana}/100";
+                                    playerDefender.Session.Network.EnqueueSend(new GameMessageSystemChat($"your {item.Value.Name} lost 1 Armor Mana. {item.Value.ArmorMana}/100", ChatMessageType.System));
+
+                                    if (item.Value.ArmorMana <= 0)
+                                    {
+                                        item.Value.ArmorMana = 0;
+                                        item.Value.LongDesc = $"Armor Mana: {item.Value.ArmorMana}/100 (BROKEN)";
+                                        playerDefender.HandleActionPutItemInContainer(item.Value.Guid.Full, playerDefender.Guid.Full, 0);
+                                        playerDefender.Session.Network.EnqueueSend(new GameMessageSystemChat($"your item is broken and has been sent to your inventory.", ChatMessageType.System));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             damageEvent.HandleLogging(attacker, defender);
 
             return damageEvent;
@@ -303,9 +337,15 @@ namespace ACE.Server.Entity
             // get resistance modifiers
             WeaponResistanceMod = WorldObject.GetWeaponResistanceModifier(attacker, attackSkill, DamageType);
 
+            float dmgmod = 1.0f;
+
+            if (attacker != playerAttacker && !(attacker is CombatPet))
+                dmgmod = (float)PropertyManager.GetDouble("monster_damage").Item;
+
             if (playerDefender != null)
             {
                 ResistanceMod = playerDefender.GetResistanceMod(DamageType, Attacker, Weapon, WeaponResistanceMod);
+                //playerDefender.Session.Network.EnqueueSend(new GameMessageSystemChat($"{attacker.Name} to {playerDefender.Name} --- {dmgmod}", ChatMessageType.Broadcast));
             }
             else
             {
@@ -320,8 +360,13 @@ namespace ACE.Server.Entity
             ShieldMod = defender.GetShieldMod(attacker, DamageType, Weapon);
 
             // calculate final output damage
-            Damage = DamageBeforeMitigation * ArmorMod * ShieldMod * ResistanceMod * DamageResistanceRatingMod;
+            Damage = (DamageBeforeMitigation * ArmorMod * ShieldMod * ResistanceMod * DamageResistanceRatingMod) * dmgmod;
             DamageMitigated = DamageBeforeMitigation - Damage;
+
+            var normaldmg = DamageBeforeMitigation * ArmorMod * ShieldMod * ResistanceMod * DamageResistanceRatingMod;
+
+            /*if (playerDefender != null)
+                playerDefender.Session.Network.EnqueueSend(new GameMessageSystemChat($"[PHYSICAL] new {Math.Round(Damage):N0} // old {Math.Round(normaldmg):N0}", ChatMessageType.Broadcast));*/
 
             return Damage;
         }

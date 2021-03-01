@@ -540,6 +540,16 @@ namespace ACE.Server.WorldObjects
                 finalDamage *= elementalDamageMod * slayerMod * resistanceMod * absorbMod;
             }
 
+            if (sourceCreature != sourcePlayer)
+            {
+                var olddmg = finalDamage;
+
+                finalDamage *= (float)PropertyManager.GetDouble("monster_magic").Item;
+
+                /*if (targetPlayer != null)
+                    targetPlayer.Session.Network.EnqueueSend(new GameMessageSystemChat($"[MAGICAL] old {Math.Round(olddmg):N0} // new {Math.Round(finalDamage):N0} @ {PropertyManager.GetDouble("monster_magic").Item}", ChatMessageType.Broadcast));*/
+            }
+
             // show debug info
             if (sourceCreature != null && sourceCreature.DebugDamage.HasFlag(Creature.DebugDamageType.Attacker))
             {

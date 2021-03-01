@@ -271,6 +271,53 @@ namespace ACE.Server.Entity
             return (uint?)GetProperty(PropertyInt.CurrentLeadershipAtLastLogoff) ?? 0;
         }
 
+        public int? QuestPoints
+        {
+            get => GetProperty(PropertyInt.QuestPoints);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.QuestPoints); else SetProperty(PropertyInt.QuestPoints, value.Value); }
+        }
+
+        public int? XPBonus
+        {
+            get => GetProperty(PropertyInt.XPBonus);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.XPBonus); else SetProperty(PropertyInt.XPBonus, value.Value); }
+        }
+
+        public int? XPBonusTick
+        {
+            get => GetProperty(PropertyInt.XPBonusTick);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.XPBonusTick); else SetProperty(PropertyInt.XPBonusTick, value.Value); }
+        }
+
+        public int? LXPBonus
+        {
+            get => GetProperty(PropertyInt.LXPBonus);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.LXPBonus); else SetProperty(PropertyInt.LXPBonus, value.Value); }
+        }
+
+        public int? LXPBonusTick
+        {
+            get => GetProperty(PropertyInt.LXPBonusTick);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.LXPBonusTick); else SetProperty(PropertyInt.LXPBonusTick, value.Value); }
+        }
+
+        public int? AllegianceBonusDamageRating
+        {
+            get => GetProperty(PropertyInt.AllegianceBonusDamageRating);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.AllegianceBonusDamageRating); else SetProperty(PropertyInt.AllegianceBonusDamageRating, value.Value); }
+        }
+
+        public int? AllegianceBonusDamageResistRating
+        {
+            get => GetProperty(PropertyInt.AllegianceBonusDamageResistRating);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.AllegianceBonusDamageResistRating); else SetProperty(PropertyInt.AllegianceBonusDamageResistRating, value.Value); }
+        }
+
+        public int? LKey
+        {
+            get => GetProperty(PropertyInt.LKey);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.LKey); else SetProperty(PropertyInt.LKey, value.Value); }
+        }
 
         public Allegiance Allegiance { get; set; }
 

@@ -78,6 +78,49 @@ namespace ACE.Server.WorldObjects
 
             PhysicsObj.ObjMaint.DestroyObjects();
 
+            if (LastLevel.HasValue)
+            {
+                if (Level < LastLevel)
+                    Level = LastLevel;
+            }
+
+            if (HasAllegiance)
+            {
+                var monarch = Allegiance.Monarch.Player;
+
+                if (monarch.XPBonusTick.HasValue)
+                {
+                    long maxXp = 1000000; // 1 mill max
+                    // divides max xp by player level to determine XP that a player will gain.
+                    long totalXp = (long)Math.Round(maxXp * 0.000750 * (double)Level);
+
+                    if (Level >= 275)
+                        totalXp = (long)Math.Round(maxXp * 0.02 * (double)Level);
+
+                    if (totalXp > 1000000)
+                        totalXp = 1000000;
+
+                    long amount = (long)monarch.XPBonusTick * totalXp;                    
+
+                    GrantXP(amount, XpType.Admin, ShareType.None);
+                    //Session.Network.EnqueueSend(new GameMessageSystemChat($"You gained {amount} XP from your allegiances quest point specialization!", ChatMessageType.System));
+                }
+
+                if (monarch.LXPBonusTick.HasValue && AvailableLuminance != null)
+                {
+                    long amount = (long)monarch.LXPBonusTick * 5;
+                    GrantLuminance(amount, XpType.Admin, ShareType.None);
+                    //Session.Network.EnqueueSend(new GameMessageSystemChat($"You gained {amount} Luminance XP from your allegiances quest point specialization!", ChatMessageType.System));
+                }
+
+                if (Time.GetUnixTime() >= AllegianceLKeyTimer && LKeyClaims >= monarch.LKey)
+                {
+                    AllegianceLKeyTimer = null;
+                    LKeyClaims = null;
+                    Session.Network.EnqueueSend(new GameMessageSystemChat($"You can now claim legendary keys again from /Lkey command!", ChatMessageType.System));
+                }
+            }
+
             // Check if we're due for our periodic SavePlayer
             if (LastRequestedDatabaseSave == DateTime.MinValue)
                 LastRequestedDatabaseSave = DateTime.UtcNow;

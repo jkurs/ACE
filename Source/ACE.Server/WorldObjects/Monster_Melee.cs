@@ -480,7 +480,7 @@ namespace ACE.Server.WorldObjects
             var baseArmor = armor.GetProperty(PropertyInt.ArmorLevel) ?? 0;
             var armorType = armor.GetProperty(PropertyInt.ArmorType) ?? 0;
             var resistance = GetResistance(armor, damageType);
-
+            
             /*Console.WriteLine(armor.Name);
             Console.WriteLine("--");
             Console.WriteLine("Base AL: " + baseArmor);
@@ -509,11 +509,14 @@ namespace ACE.Server.WorldObjects
 
             // TODO: could brittlemail / lures send a piece of armor or clothing's AL into the negatives?
             //if (effectiveAL < 0 && effectiveRL != 0)
-                //effectiveRL = 1.0f / effectiveRL;
+            //effectiveRL = 1.0f / effectiveRL;
 
             /*Console.WriteLine("Effective AL: " + effectiveAL);
             Console.WriteLine("Effective RL: " + effectiveRL);
             Console.WriteLine();*/
+
+            if (armor.ArmorMana.HasValue && armor.ArmorMana <= 0)
+                return 0;
 
             return effectiveAL * effectiveRL;
         }

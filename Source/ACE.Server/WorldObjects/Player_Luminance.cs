@@ -17,9 +17,18 @@ namespace ACE.Server.WorldObjects
             // following the same model as Player_Xp
 
             var modifier = PropertyManager.GetDouble("luminance_modifier").Item;
+            float allegianceBonusLXP = 0;
+
+            if (HasAllegiance)
+            {
+                var monarch = Allegiance.Monarch.Player;
+
+                if (monarch.LXPBonus.HasValue)
+                    allegianceBonusLXP = 0.05f * (float)monarch.LXPBonus;
+            }
 
             // should this be passed upstream to fellowship?
-            var enchantment = GetXPAndLuminanceModifier(xpType);
+            var enchantment = GetXPAndLuminanceModifier(xpType) + allegianceBonusLXP;
 
             var m_amount = (long)Math.Round(amount * enchantment * modifier);
 

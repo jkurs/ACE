@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ACE.Common;
 using ACE.Database;
 using ACE.DatLoader;
 using ACE.DatLoader.FileTypes;
@@ -45,7 +46,7 @@ namespace ACE.Server.WorldObjects
         {
             var strength = Attributes[PropertyAttribute.Strength].Current;
 
-            return (int)((150 * strength) + (AugmentationIncreasedCarryingCapacity * 30 * strength));
+            return (int)((150 * strength) + (AugmentationIncreasedCarryingCapacity * 5 * strength));
         }
 
         public bool HasEnoughBurdenToAddToInventory(WorldObject worldObject)
@@ -973,9 +974,38 @@ namespace ACE.Server.WorldObjects
                             var itemFoundOnMyCorpse = itemFoundOnCorpse && (itemRootOwner.VictimId == Guid.Full);
                             if (item.GeneratorId != null || (itemFoundOnCorpse && !itemFoundOnMyCorpse)) // item is controlled by a generator or is on a corpse that is not my own
                             {
+
+                                // anything with 29295 is the blank aug gem, handling how many you can pick up before the timer activates.
+                                if (item.WeenieClassId == 29295)
+                                {
+                                    if (!AugLimiter.HasValue)
+                                        AugLimiter = 0;
+                                }
+
+                                if (item.WeenieClassId == 29295 && AugLimiter <= 2)
+                                {
+                                    if (AugLimiter >= 1 && QuestManager.CanSolve(item.Quest))
+                                    {
+                                        AugLimiter = 0;
+                                    }
+                                    else if (!QuestManager.CanSolve(item.Quest) && AugLimiter < 1 || QuestManager.CanSolve(item.Quest) && AugLimiter < 1)
+                                    {
+                                        AugLimiter++;
+                                        QuestManager.Erase("AugmentationBlankGemAcquired");
+                                    }
+                                }
+
                                 if (QuestManager.CanSolve(item.Quest))
                                 {
                                     questSolve = true;
+
+                                    if (item.ItemType == ItemType.Armor && item.Workmanship == null || item.ItemType == ItemType.Clothing && item.Workmanship == null || item.ItemType == ItemType.MeleeWeapon && item.Workmanship == null ||
+                                    item.ItemType == ItemType.MissileWeapon && item.Workmanship == null || item.ItemType == ItemType.Caster && item.Workmanship == null)
+                                    ModifyQuestItem(item, 1, 5, false);
+
+                                    // certain items dont ever have an emote stamp, so we have to select these quests specifically to allow for qp gain.
+                                    if (item.Quest.Contains("OlthoiHunting", StringComparison.OrdinalIgnoreCase) || (item.Quest.Contains("Tusk") && item.Quest.Contains("Pickup")) || item.Quest == "swordofbellenese")
+                                        QuestPointAdd(item.Quest, item);
                                 }
                                 else
                                 {
@@ -1618,6 +1648,9 @@ namespace ACE.Server.WorldObjects
 
         private WeenieError CheckWieldRequirements(WorldObject item)
         {
+            if (item.ArmorMana <= 0)
+                return WeenieError.YouCannotUseThatItem;
+
             if (!PropertyManager.GetBool("use_wield_requirements").Item)
                 return WeenieError.None;
 
@@ -3008,7 +3041,10 @@ namespace ACE.Server.WorldObjects
                     else
                         amount -= 1;
 
-                    TryCreateForGive(emoter, item);
+                   /* if (item.Workmanship == null && item.ItemType == ItemType.WeaponOrCaster || item.Workmanship == null && item.ItemType == ItemType.Vestements)
+                        TryCreateForGive(emoter, ModifyQuestItem(item));
+                    else*/
+                        TryCreateForGive(emoter, item);
                 }
             }
             else
@@ -3034,6 +3070,28 @@ namespace ACE.Server.WorldObjects
 
             if (!(giver.GetProperty(PropertyBool.NpcInteractsSilently) ?? false))
             {
+                var modChance = ThreadSafeRandom.Next(0.00f, 1.00f);
+                var checkForExtra = ThreadSafeRandom.Next(0.00f, 1.00f);
+                var checkForExtra2 = ThreadSafeRandom.Next(0.00f, 1.00f);
+                var checkForExtra3 = ThreadSafeRandom.Next(0.00f, 1.00f);
+
+                if (modChance <= 1.00f)
+                    itemBeingGiven = ModifyQuestItem(itemBeingGiven, 1, 5, false);
+
+                if (checkForExtra <= 0.15f && RerollForSlayer(itemBeingGiven) && itemBeingGiven.ItemType == ItemType.MeleeWeapon ||
+                    checkForExtra <= 0.15f && RerollForSlayer(itemBeingGiven) && itemBeingGiven.ItemType == ItemType.MissileWeapon ||
+                    checkForExtra <= 0.15f && RerollForSlayer(itemBeingGiven) && itemBeingGiven.ItemType == ItemType.Caster)
+                    GiveSlayer(itemBeingGiven);
+
+                if (checkForExtra2 <= 0.15f && RerollForRend(itemBeingGiven) && itemBeingGiven.ItemType == ItemType.MeleeWeapon ||
+                    checkForExtra2 <= 0.15f && RerollForRend(itemBeingGiven) && itemBeingGiven.ItemType == ItemType.MissileWeapon ||
+                    checkForExtra2 <= 0.15f && RerollForRend(itemBeingGiven) && itemBeingGiven.ItemType == ItemType.Caster)
+                    GiveRend(itemBeingGiven);
+
+                if (checkForExtra3 <= 0.15f && RerollForSet(itemBeingGiven) && itemBeingGiven.ItemType == ItemType.Armor ||
+                    checkForExtra3 <= 0.15f && RerollForSet(itemBeingGiven) && itemBeingGiven.ItemType == ItemType.Clothing)
+                    GiveSet(itemBeingGiven);
+
                 var msg = new GameMessageSystemChat($"{giver.Name} gives you {(itemBeingGiven.StackSize > 1 ? $"{itemBeingGiven.StackSize} " : "")}{itemBeingGiven.GetNameWithMaterial(itemBeingGiven.StackSize)}.", ChatMessageType.Broadcast);
                 Session.Network.EnqueueSend(msg);
 

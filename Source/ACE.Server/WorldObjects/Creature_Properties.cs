@@ -353,7 +353,11 @@ namespace ACE.Server.WorldObjects
             get => GetProperty(PropertyInt.SocietyRankRadblo);
             set { if (!value.HasValue) RemoveProperty(PropertyInt.SocietyRankRadblo); else SetProperty(PropertyInt.SocietyRankRadblo, value.Value); }
         }
-
+        public bool CombatPetUpgraded
+        {
+            get => GetProperty(PropertyBool.CombatPetUpgraded) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CombatPetUpgraded); else SetProperty(PropertyBool.CombatPetUpgraded, value); }
+        }
         public FactionBits Society => Faction1Bits ?? FactionBits.None;
     }
 }

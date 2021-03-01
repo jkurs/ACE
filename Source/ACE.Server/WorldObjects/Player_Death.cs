@@ -124,11 +124,13 @@ namespace ACE.Server.WorldObjects
         /// </summary>
         public void InflictVitaePenalty(int amount = 5)
         {
+
             DeathLevel = Level; // for calculating vitae XP
+           
             VitaeCpPool = 0;    // reset vitae XP earned
 
             var msgDeathLevel = new GameMessagePrivateUpdatePropertyInt(this, PropertyInt.DeathLevel, DeathLevel ?? 0);
-            var msgVitaeCpPool = new GameMessagePrivateUpdatePropertyInt(this, PropertyInt.VitaeCpPool, VitaeCpPool.Value);
+            var msgVitaeCpPool = new GameMessagePrivateUpdatePropertyInt64(this, PropertyInt64.VitaeCpPool, VitaeCpPool.Value);
 
             Session.Network.EnqueueSend(msgDeathLevel, msgVitaeCpPool);
 

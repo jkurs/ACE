@@ -14,7 +14,9 @@ using ACE.Server.Network;
 using ACE.Server.Network.GameEvent.Events;
 using ACE.Server.Network.GameMessages.Messages;
 using ACE.Server.WorldObjects;
-
+using ACE.Entity.Enum.Properties;
+using ACE.DatLoader;
+using ACE.Server.Factories;
 
 namespace ACE.Server.Command.Handlers
 {
@@ -31,8 +33,790 @@ namespace ACE.Server.Command.Handlers
             session.Network.EnqueueSend(new GameMessageSystemChat($"Current world population: {PlayerManager.GetOnlineCount().ToString()}\n", ChatMessageType.Broadcast));
         }
 
-        // quest info (uses GDLe formatting to match plugin expectations)
-        [CommandHandler("myquests", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, "Shows your quest log")]
+        [CommandHandler("checkxp", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, 0)]
+        public static void HandleCheckXp(Session session, params string[] parameters)
+        {
+            if (session.Player.Level >= 275)
+            {
+                var currentxp = session.Player.TotalXpBeyond;
+
+                var currentremaining = currentxp - session.Player.TotalExperience;
+
+                session.Network.EnqueueSend(new GameMessageSystemChat($"You need {currentremaining:N0}xp to reach level {session.Player.Level + 1}. Required total xp is {currentxp:N0}", ChatMessageType.Broadcast));
+            }
+            else
+                return;         
+        }
+
+        [CommandHandler("qp", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, "add quest point allocations")]
+        public static void HandleQuestPoint(Session session, params string[] parameters)
+        {
+            if (!session.Player.HasAllegiance)
+            {
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Only Monarchs may use this command.", ChatMessageType.System));
+                return;
+            }
+            else
+            {
+                if (session.Player.Guid.Full != session.Player.Allegiance.Monarch.PlayerGuid.Full)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"Only Monarchs may use this command.", ChatMessageType.System));
+                    return;
+                }
+                else
+                {
+
+                    if (parameters.Length == 0)
+                    {
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"Please include which bonus you would like for your allegiance.", ChatMessageType.System));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"#-------------------------------------#", ChatMessageType.Broadcast));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"%XP- Each point raises the amount of xp your allegiance members get by 5%", ChatMessageType.Allegiance));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"TXP- Each point grants a small amount of XP automatically to allegiance members every 5 seconds.", ChatMessageType.Allegiance));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"%LXP- Each point raises the amount of luminance your allegiance members get by 5%", ChatMessageType.Allegiance));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"TLXP- Each point grants a small amount of luminance automatically to allegiance members every 5 seconds.", ChatMessageType.Allegiance));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"DR - Each point raises each allegiance members damage rating by 1.", ChatMessageType.Allegiance));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"DRR - Each point raises each allegiance members Damage Resistance rating by 1", ChatMessageType.Allegiance));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"LKey - Each point grants allegiance members the ability to generate a legendary key every 1 hour.", ChatMessageType.Allegiance));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"#-------------------------------------#", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+                    if (parameters[0].Equals("%xp", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // cost base 250 + 50 for each level
+                        var cost = 250 + ((session.Player.XPBonus ?? 0) * 50);
+
+                        if (session.Player.QuestPoints < cost)
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough quest points to add this point. You need {cost} but you only have {session.Player.QuestPoints}", ChatMessageType.Broadcast));
+                            return;
+                        }
+
+                        if (session.Player.XPBonus == null)
+                            session.Player.XPBonus = 0;
+
+                        session.Player.QuestPoints -= cost;
+                        session.Player.XPBonus++;
+
+                        if (!session.Player.QuestPointsSpent.HasValue)
+                            session.Player.QuestPointsSpent = 0;
+
+                        session.Player.QuestPointsSpent += cost;
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into %XP. Your allegiance members will now gain {session.Player.XPBonus}% XP from all sources.", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+                    if (parameters[0].Equals("%lxp", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // 1000 quest points per point.
+                        var cost = 250 + ((session.Player.LXPBonus ?? 0) * 50);
+
+                        if (session.Player.QuestPoints < cost)
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough quest points to add this point. You need {cost} but you only have {session.Player.QuestPoints}", ChatMessageType.Broadcast));
+                            return;
+                        }
+
+                        if (session.Player.LXPBonus == null)
+                            session.Player.LXPBonus = 0;
+
+                        session.Player.QuestPoints -= cost;
+                        session.Player.LXPBonus++;
+
+                        if (!session.Player.QuestPointsSpent.HasValue)
+                            session.Player.QuestPointsSpent = 0;
+
+                        session.Player.QuestPointsSpent += cost;
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into %LXP. Your allegiance members will now gain {session.Player.LXPBonus}% Luminance XP from all sources.", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+                    if (parameters[0].Equals("txp", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // 1000 quest points per point.
+                        var cost = 250 + ((session.Player.XPBonusTick ?? 0) * 50);
+
+                        var tickamount = 10000;
+
+                        if (session.Player.QuestPoints < cost)
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough quest points to add this point. You need {cost} but you only have {session.Player.QuestPoints}", ChatMessageType.Broadcast));
+                            return;
+                        }
+
+                        if (session.Player.XPBonusTick == null)
+                            session.Player.XPBonusTick = 0;
+
+                        session.Player.QuestPoints -= cost;
+                        session.Player.XPBonusTick++;
+
+                        if (!session.Player.QuestPointsSpent.HasValue)
+                            session.Player.QuestPointsSpent = 0;
+
+                        session.Player.QuestPointsSpent += cost;
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into TXP. Your allegiance members will now gain {tickamount * session.Player.XPBonusTick:N0} XP every 5 seconds.", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+                    if (parameters[0].Equals("dr", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // 1000 quest points per point.
+                        var cost = 250 + ((session.Player.AllegianceBonusDamageRating ?? 0) * 100);
+
+                        if (session.Player.QuestPoints < cost)
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough quest points to add this point. You need {cost} but you only have {session.Player.QuestPoints}", ChatMessageType.Broadcast));
+                            return;
+                        }
+
+                        if (session.Player.AllegianceBonusDamageRating == null)
+                            session.Player.AllegianceBonusDamageRating = 0;
+
+                        session.Player.QuestPoints -= cost;
+                        session.Player.AllegianceBonusDamageRating++;
+
+                        if (!session.Player.QuestPointsSpent.HasValue)
+                            session.Player.QuestPointsSpent = 0;
+
+                        session.Player.QuestPointsSpent += cost;
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into Damage Rating. Your allegiance members will now gain +{session.Player.AllegianceBonusDamageRating:N0} Damage Rating.", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+                    if (parameters[0].Equals("drr", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // 1000 quest points per point.
+                        var cost = 250 + ((session.Player.AllegianceBonusDamageResistRating ?? 0) * 100);
+
+                        if (session.Player.QuestPoints < cost)
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough quest points to add this point. You need {cost} but you only have {session.Player.QuestPoints}", ChatMessageType.Broadcast));
+                            return;
+                        }
+
+                        if (session.Player.AllegianceBonusDamageResistRating == null)
+                            session.Player.AllegianceBonusDamageResistRating = 0;
+
+                        session.Player.QuestPoints -= cost;
+                        session.Player.AllegianceBonusDamageResistRating++;
+
+                        if (!session.Player.QuestPointsSpent.HasValue)
+                            session.Player.QuestPointsSpent = 0;
+
+                        session.Player.QuestPointsSpent += cost;
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into Damage Resist Rating. Your allegiance members will now gain +{session.Player.AllegianceBonusDamageResistRating:N0} Damage Resist Rating.", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+                    if (parameters[0].Equals("tlxp", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // 1000 quest points per point.
+                        var cost = 250 + ((session.Player.LXPBonusTick ?? 0) * 50);
+
+                        var tickamount = 5;
+
+                        if (session.Player.QuestPoints < cost)
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough quest points to add this point. You need {cost} but you only have {session.Player.QuestPoints}", ChatMessageType.Broadcast));
+                            return;
+                        }
+
+                        if (session.Player.LXPBonusTick == null)
+                            session.Player.LXPBonusTick = 0;
+
+                        session.Player.QuestPoints -= cost;
+                        session.Player.LXPBonusTick++;
+
+                        if (!session.Player.QuestPointsSpent.HasValue)
+                            session.Player.QuestPointsSpent = 0;
+
+                        session.Player.QuestPointsSpent += cost;
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into TLXP. Your allegiance members will now gain {tickamount * session.Player.LXPBonusTick:N0} Luminance XP every 5 seconds", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+                    if (parameters[0].Equals("lkey", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // 1000 quest points per point.
+                        var cost = 250 + ((session.Player.LKey ?? 0) * 50);
+
+                        if (session.Player.QuestPoints < cost)
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough quest points to add this point. You need {cost} but you only have {session.Player.QuestPoints}", ChatMessageType.Broadcast));
+                            return;
+                        }
+
+                        if (session.Player.LKey == null)
+                            session.Player.LKey = 0;
+
+                        session.Player.QuestPoints -= cost;
+                        session.Player.LKey++;
+
+                        if (!session.Player.QuestPointsSpent.HasValue)
+                            session.Player.QuestPointsSpent = 0;
+
+                        session.Player.QuestPointsSpent += cost;
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into LKEY. Your allegiance members can claim legendary keys using the command /Lkey {session.Player.LKey} times an hour", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+                    if (parameters[0].Equals("show", StringComparison.OrdinalIgnoreCase))
+                    {
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"Current Quest Point Allocations", ChatMessageType.System));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"#-------------------------------------#", ChatMessageType.Broadcast));
+
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"Available QP: {session.Player.QuestPoints}. Total QP spent: {session.Player.QuestPointsSpent}", ChatMessageType.Broadcast));
+
+                        if (session.Player.XPBonus.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"%XP has been upgraded {session.Player.XPBonus}x Times. Allegiance Members are gaining {session.Player.XPBonus * 5}% XP from all sources.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"%XP has been upgraded 0x Times. Allegiance Members are gaining 0% XP from all sources.", ChatMessageType.Allegiance));
+
+                        if (session.Player.XPBonusTick.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"TXP has been upgraded {session.Player.XPBonusTick}x Times. Allegiance Members are gaining up to {1000000 * session.Player.XPBonusTick:N0} XP every 5 seconds.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"TXP has been upgraded 0x Times. Allegiance Members are gaining 0 XP every 5 seconds.", ChatMessageType.Allegiance));
+
+                        if (session.Player.LXPBonus.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"%LXP has been upgraded {session.Player.LXPBonus}x Times. Allegiance Members are gaining {session.Player.LXPBonus * 5}% Luminance XP from all sources.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"%LXP has been upgraded 0x Times. Allegiance Members are gaining 0% Luminace XP from all sources.", ChatMessageType.Allegiance));
+
+                        if (session.Player.LXPBonusTick.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"TLXP has been upgraded {session.Player.LXPBonusTick}x Times. Allegiance Members are gaining {session.Player.LXPBonusTick * 5} Luminance XP every 5 seconds.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"TLXP has been upgraded 0x Times. Allegiance Members are gaining 0 Luminance XP every 5 seconds.", ChatMessageType.Allegiance));
+
+                        if (session.Player.AllegianceBonusDamageRating.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"DR has been upgraded {session.Player.AllegianceBonusDamageRating}x Times. Allegiance Members are gaining +{session.Player.AllegianceBonusDamageRating} Damage Rating", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"DR has been upgraded 0x Times. Allegiance Members are gaining 0 Damage Rating.", ChatMessageType.Allegiance));
+
+                        if (session.Player.AllegianceBonusDamageResistRating.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"DRR has been upgraded {session.Player.AllegianceBonusDamageResistRating}x Times. Allegiance Members are gaining +{session.Player.AllegianceBonusDamageResistRating} Damage Resist Rating.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"DRR has been upgraded 0x Times. Allegiance Members are gaining 0 Damage Resist Rating", ChatMessageType.Allegiance));
+
+                        if (session.Player.LKey.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"LKEY has been upgraded {session.Player.LKey}x Times. Allegiance Members are allowed to claim {session.Player.LKey} Aged Legendary keys every hour using /Lkey.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"LKEY has been upgraded 0x Times. Allegiance Members cannot claim any Aged Legendary Keys.", ChatMessageType.Allegiance));
+
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"#-------------------------------------#", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+
+                    if (!parameters[0].Equals("%xp", StringComparison.OrdinalIgnoreCase) || !parameters[0].Equals("txp", StringComparison.OrdinalIgnoreCase) || !parameters[0].Equals("dr", StringComparison.OrdinalIgnoreCase)
+                        || !parameters[0].Equals("drr", StringComparison.OrdinalIgnoreCase) || !parameters[0].Equals("dr", StringComparison.OrdinalIgnoreCase) || !parameters[0].Equals("show", StringComparison.OrdinalIgnoreCase)
+                        || parameters.Length > 0 || !parameters[0].Equals("lkey", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+
+        [CommandHandler("Lkey", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, 0,
+            "claim legendary keys from allegiance Lkey QP bonus",
+            "")]
+        public static void HandleLKey(Session session, params string[] parameters)
+        {
+            if (!session.Player.HasAllegiance)
+            {
+                session.Network.EnqueueSend(new GameMessageSystemChat($"You are not in an allegiance.", ChatMessageType.System));
+                return;
+            }
+            else
+            {
+                var monarch = session.Player.Allegiance.Monarch.Player;
+
+                if (monarch.LKey.HasValue)
+                {
+                    var claims = monarch.LKey;
+
+                    if (!session.Player.LKeyClaims.HasValue)
+                        session.Player.LKeyClaims = 0;
+
+                    if (session.Player.LKeyClaims < claims)
+                    {
+                        var agedKey = WorldObjectFactory.CreateNewWorldObject(48746);
+
+                        if (!session.Player.TryCreateInInventoryWithNetworking(agedKey))
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"Failed to create your legendary key, please make space or make sure you have enough burden!", ChatMessageType.System));
+                            return;
+                        }
+
+                        session.Player.TryCreateInInventoryWithNetworking(agedKey);
+                        session.Player.LKeyClaims++;
+
+                        if (session.Player.LKeyClaims >= claims)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"You have claimed a Legendary Key. You do not have any more claims and are now on cooldown. You may claim another if your monarch allocates QP into LKey which bypasses the timer.", ChatMessageType.System));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"You have claimed a Legendary Key. You have {claims - session.Player.LKeyClaims} claims remaining.", ChatMessageType.System));
+
+
+                        if (session.Player.LKeyClaims >= claims && !session.Player.AllegianceLKeyTimer.HasValue)
+                            session.Player.SetProperty(PropertyFloat.AllegianceLKeyTimer, Time.GetFutureUnixTime(3600)); // sets timer for key reset. Does not reset if a point is allocated during cooldown.
+                    }
+                    else
+                    {
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"Your timer has not expired, or you have claimed your maximum number of keys that your allegiance QP allocation allows.", ChatMessageType.System));
+                        return;
+                    }
+                }
+            }
+        }
+
+        [CommandHandler("attribute", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, "Raise attributes over max.")]
+        public static void HandleAttribute(Session session, params string[] parameters)
+        {
+            var amt = 1;
+            if (parameters.Length > 1)
+                int.TryParse(parameters[1], out amt);
+
+            if (parameters[0].Equals("str", StringComparison.OrdinalIgnoreCase))
+            {
+                var str = session.Player.Strength;
+
+                if (!str.IsMaxRank)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"Your Strength is not max level yet. Please raise strength until it is maxxed out. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                double strcost = 0;
+                var multiamount = 0UL;
+                var strCostEthereal = session.Player.RaisedStr;
+
+                if (amt > 1)
+                {
+                    for (var i = 0; i < amt; i++)
+                    {
+                        strCostEthereal++;
+                        strcost = (ulong)Math.Round(10UL * (ulong)strCostEthereal / (2.995D - (0.001D * strCostEthereal)) * 329220194D);
+                        multiamount += (ulong)strcost;
+                    }
+                }
+                else
+                    strcost = (ulong)Math.Round(10UL * (ulong)session.Player.RaisedStr / (2.995D - (0.001D * session.Player.RaisedStr)) * 329220194D);
+
+                if (session.Player.AvailableExperience < (long?)multiamount && amt > 1)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Strength up {amt} times. ", ChatMessageType.Broadcast));
+                    return;
+                }
+                else if (session.Player.AvailableExperience < strcost)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Strength up. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                if (amt > 1)
+                {
+                    session.Player.RaisedStr += amt;
+                    str.StartingValue += (uint)amt;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)multiamount;
+                }
+                else
+                {
+                    session.Player.RaisedStr++;
+                    str.StartingValue += 1;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)strcost;
+                }
+
+                
+                session.Network.EnqueueSend(new GameMessagePrivateUpdatePropertyInt64(session.Player, PropertyInt64.AvailableExperience, session.Player.AvailableExperience ?? 0));
+                session.Network.EnqueueSend(new GameMessagePrivateUpdateAttribute(session.Player, session.Player.Strength));
+
+                if (amt > 1)
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Strength to {str.Base}! XP spent {multiamount:N0}", ChatMessageType.Advancement));
+                else
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Strength to {str.Base}! XP spent {strcost:N0}", ChatMessageType.Advancement));                
+            }
+
+            if (parameters[0].Equals("end", StringComparison.OrdinalIgnoreCase))
+            {
+                var end = session.Player.Endurance;
+
+                if (!end.IsMaxRank)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"Your Endurance is not max level yet. Please raise Endurance until it is maxxed out. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                double endcost = 0;
+                var multiamount = 0UL;
+                var endCostEthereal = session.Player.RaisedEnd;
+
+                if (amt > 1)
+                {
+                    for (var i = 0; i < amt; i++)
+                    {
+                        endCostEthereal++;
+                        endcost = (ulong)Math.Round(10UL * (ulong)endCostEthereal / (2.995D - (0.001D * endCostEthereal)) * 329220194D);
+                        multiamount += (ulong)endcost;
+                    }
+                }
+                else
+                    endcost = (ulong)Math.Round(10UL * (ulong)session.Player.RaisedEnd / (2.995D - (0.001D * session.Player.RaisedEnd)) * 329220194D);
+
+                if (session.Player.AvailableExperience < (long?)multiamount && amt > 1)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Endurance up {amt} times. ", ChatMessageType.Broadcast));
+                    return;
+                }
+                else if (session.Player.AvailableExperience < endcost)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Endurance up. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                if (amt > 1)
+                {
+                    session.Player.RaisedEnd += amt;
+                    end.StartingValue += (uint)amt;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)multiamount;
+                }
+                else
+                {
+                    session.Player.RaisedEnd++;
+                    end.StartingValue += 1;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)endcost;
+                }
+
+
+                session.Network.EnqueueSend(new GameMessagePrivateUpdatePropertyInt64(session.Player, PropertyInt64.AvailableExperience, session.Player.AvailableExperience ?? 0));
+                session.Network.EnqueueSend(new GameMessagePrivateUpdateAttribute(session.Player, session.Player.Endurance));
+
+                if (amt > 1)
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Endurance to {end.Base}! XP spent {multiamount:N0}", ChatMessageType.Advancement));
+                else
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Endurance to {end.Base}! XP spent {endcost:N0}", ChatMessageType.Advancement));
+            }
+
+            if (parameters[0].Equals("coord", StringComparison.OrdinalIgnoreCase))
+            {
+                var coord = session.Player.Coordination;
+
+                if (!coord.IsMaxRank)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"Your Coordination is not max level yet. Please raise Coordination until it is maxxed out. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                double coordcost = 0;
+                var multiamount = 0UL;
+                var coordCostEthereal = session.Player.RaisedCoord;
+
+                if (amt > 1)
+                {
+                    for (var i = 0; i < amt; i++)
+                    {
+                        coordCostEthereal++;
+                        coordcost = (ulong)Math.Round(10UL * (ulong)coordCostEthereal / (2.995D - (0.001D * coordCostEthereal)) * 329220194D);
+                        multiamount += (ulong)coordcost;
+                    }
+                }
+                else
+                    coordcost = (ulong)Math.Round(10UL * (ulong)session.Player.RaisedCoord / (2.995D - (0.001D * session.Player.RaisedCoord)) * 329220194D);
+
+                if (session.Player.AvailableExperience < (long?)multiamount && amt > 1)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Coordination up {amt} times. ", ChatMessageType.Broadcast));
+                    return;
+                }
+                else if (session.Player.AvailableExperience < coordcost)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Coordination up. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                if (amt > 1)
+                {
+                    session.Player.RaisedCoord += amt;
+                    coord.StartingValue += (uint)amt;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)multiamount;
+                }
+                else
+                {
+                    session.Player.RaisedCoord++;
+                    coord.StartingValue += 1;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)coordcost;
+                }
+
+
+                session.Network.EnqueueSend(new GameMessagePrivateUpdatePropertyInt64(session.Player, PropertyInt64.AvailableExperience, session.Player.AvailableExperience ?? 0));
+                session.Network.EnqueueSend(new GameMessagePrivateUpdateAttribute(session.Player, session.Player.Coordination));
+
+                if (amt > 1)
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Coordination to {coord.Base}! XP spent {multiamount:N0}", ChatMessageType.Advancement));
+                else
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Coordination to {coord.Base}! XP spent {coordcost:N0}", ChatMessageType.Advancement));
+            }
+
+            if (parameters[0].Equals("quick", StringComparison.OrdinalIgnoreCase))
+            {
+                var quick = session.Player.Quickness;
+
+                if (!quick.IsMaxRank)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"Your Quickness is not max level yet. Please raise Quickness until it is maxxed out. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                double quickcost = 0;
+                var multiamount = 0UL;
+                var quickCostEthereal = session.Player.RaisedQuick;
+
+                if (amt > 1)
+                {
+                    for (var i = 0; i < amt; i++)
+                    {
+                        quickCostEthereal++;
+                        quickcost = (ulong)Math.Round(10UL * (ulong)quickCostEthereal / (2.995D - (0.001D * quickCostEthereal)) * 329220194D);
+                        multiamount += (ulong)quickcost;
+                    }
+                }
+                else
+                    quickcost = (ulong)Math.Round(10UL * (ulong)session.Player.RaisedQuick / (2.995D - (0.001D * session.Player.RaisedQuick)) * 329220194D);
+
+                if (session.Player.AvailableExperience < (long?)multiamount && amt > 1)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Quickness up {amt} times. ", ChatMessageType.Broadcast));
+                    return;
+                }
+                else if (session.Player.AvailableExperience < quickcost)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Quickness up. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                if (amt > 1)
+                {
+                    session.Player.RaisedQuick += amt;
+                    quick.StartingValue += (uint)amt;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)multiamount;
+                }
+                else
+                {
+                    session.Player.RaisedQuick++;
+                    quick.StartingValue += 1;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)quickcost;
+                }
+
+
+                session.Network.EnqueueSend(new GameMessagePrivateUpdatePropertyInt64(session.Player, PropertyInt64.AvailableExperience, session.Player.AvailableExperience ?? 0));
+                session.Network.EnqueueSend(new GameMessagePrivateUpdateAttribute(session.Player, session.Player.Quickness));
+
+                if (amt > 1)
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Quickness to {quick.Base}! XP spent {multiamount:N0}", ChatMessageType.Advancement));
+                else
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Quickness to {quick.Base}! XP spent {quickcost:N0}", ChatMessageType.Advancement));
+            }
+
+            if (parameters[0].Equals("focus", StringComparison.OrdinalIgnoreCase))
+            {
+                var focus = session.Player.Focus;
+
+                if (!focus.IsMaxRank)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"Your Focus is not max level yet. Please raise Focus until it is maxxed out. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                double focuscost = 0;
+                var multiamount = 0UL;
+                var focusCostEthereal = session.Player.RaisedFocus;
+
+                if (amt > 1)
+                {
+                    for (var i = 0; i < amt; i++)
+                    {
+                        focusCostEthereal++;
+                        focuscost = (ulong)Math.Round(10UL * (ulong)focusCostEthereal / (2.995D - (0.001D * focusCostEthereal)) * 329220194D);
+                        multiamount += (ulong)focuscost;
+                    }
+                }
+                else
+                    focuscost = (ulong)Math.Round(10UL * (ulong)session.Player.RaisedFocus / (2.995D - (0.001D * session.Player.RaisedFocus)) * 329220194D);
+
+                if (session.Player.AvailableExperience < (long?)multiamount && amt > 1)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Focus up {amt} times. ", ChatMessageType.Broadcast));
+                    return;
+                }
+                else if (session.Player.AvailableExperience < focuscost)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Focus up. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                if (amt > 1)
+                {
+                    session.Player.RaisedFocus += amt;
+                    focus.StartingValue += (uint)amt;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)multiamount;
+                }
+                else
+                {
+                    session.Player.RaisedFocus++;
+                    focus.StartingValue += 1;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)focuscost;
+                }
+
+
+                session.Network.EnqueueSend(new GameMessagePrivateUpdatePropertyInt64(session.Player, PropertyInt64.AvailableExperience, session.Player.AvailableExperience ?? 0));
+                session.Network.EnqueueSend(new GameMessagePrivateUpdateAttribute(session.Player, session.Player.Focus));
+
+                if (amt > 1)
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Focus to {focus.Base}! XP spent {multiamount:N0}", ChatMessageType.Advancement));
+                else
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Focus to {focus.Base}! XP spent {focuscost:N0}", ChatMessageType.Advancement));
+            }
+
+
+            if (parameters[0].Equals("self", StringComparison.OrdinalIgnoreCase))
+            {
+                var self = session.Player.Self;
+
+                if (!self.IsMaxRank)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"Your Self is not max level yet. Please raise Self until it is maxxed out. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                double selfcost = 0;
+                var multiamount = 0UL;
+                var selfCostEthereal = session.Player.RaisedSelf;
+
+                if (amt > 1)
+                {
+                    for (var i = 0; i < amt; i++)
+                    {
+                        selfCostEthereal++;
+                        selfcost = (ulong)Math.Round(10UL * (ulong)selfCostEthereal / (2.995D - (0.001D * selfCostEthereal)) * 329220194D);
+                        multiamount += (ulong)selfcost;
+                    }
+                }
+                else
+                    selfcost = (ulong)Math.Round(10UL * (ulong)session.Player.RaisedSelf / (2.995D - (0.001D * session.Player.RaisedSelf)) * 329220194D);
+
+                if (session.Player.AvailableExperience < (long?)multiamount && amt > 1)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Self up {amt} times. ", ChatMessageType.Broadcast));
+                    return;
+                }
+                else if (session.Player.AvailableExperience < selfcost)
+                {
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You do not have enough available experience to level your Self up. ", ChatMessageType.Broadcast));
+                    return;
+                }
+
+                if (amt > 1)
+                {
+                    session.Player.RaisedSelf += amt;
+                    self.StartingValue += (uint)amt;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)multiamount;
+                }
+                else
+                {
+                    session.Player.RaisedSelf++;
+                    self.StartingValue += 1;
+                    session.Player.AvailableExperience = session.Player.AvailableExperience - (long?)selfcost;
+                }
+
+
+                session.Network.EnqueueSend(new GameMessagePrivateUpdatePropertyInt64(session.Player, PropertyInt64.AvailableExperience, session.Player.AvailableExperience ?? 0));
+                session.Network.EnqueueSend(new GameMessagePrivateUpdateAttribute(session.Player, session.Player.Self));
+
+                if (amt > 1)
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Self to {self.Base}! XP spent {multiamount:N0}", ChatMessageType.Advancement));
+                else
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"You have increased your Self to {self.Base}! XP spent {selfcost:N0}", ChatMessageType.Advancement));
+            }
+
+            if (parameters[0].Equals("str", StringComparison.OrdinalIgnoreCase) && parameters[0].Equals("end", StringComparison.OrdinalIgnoreCase) && parameters[0].Equals("coord", StringComparison.OrdinalIgnoreCase) &&
+                parameters[0].Equals("quick", StringComparison.OrdinalIgnoreCase) && parameters[0].Equals("focus", StringComparison.OrdinalIgnoreCase) && parameters[0].Equals("self", StringComparison.OrdinalIgnoreCase))
+            {
+
+                session.Network.EnqueueSend(new GameMessageSystemChat($"must specify which attribute you wish to raise. ex. /attribute STR or /attribute END or /attribute COORD or /attribute QUICK or /attribute FOCUS or /attribute SELF", ChatMessageType.Broadcast));
+
+            }
+
+        }
+
+        [CommandHandler("repair", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, 0,
+            "Choose an armor piece to repair by Identifying it and using this command.",
+            "")]
+        public static void HandleRepair(Session session, params string[] parameters)
+        {
+            /*var value = 0;
+            if (parameters.Length > 0)
+                int.TryParse(parameters[0], out value);
+*/
+
+            var obj = CommandHandlerHelper.GetLastAppraisedObject(session);
+            if (obj == null) return;
+
+            // ensure in inventory
+            var Inventory = session.Player.Inventory;
+            if  (!Inventory.ContainsKey(obj.Guid))
+            {
+                session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] You do not own that item or it is an invalid object.", ChatMessageType.System));
+                return;
+            }
+
+            if (!obj.ArmorMana.HasValue)
+            {
+                session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] Item does not have Armor Mana.", ChatMessageType.System));
+                return;
+            }
+
+            if (session.Player.GetInventoryItemsOfWCID(5000000).Count <= 0)
+            {
+                session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] You do not have an Armor Mana Repair Kit in your inventory.", ChatMessageType.System));
+                return;
+            }
+
+            if (obj.ArmorMana >= 50)
+            {
+                session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] Armor is not under 50% Armor Mana.", ChatMessageType.System));
+                return;
+            }            
+
+            // repair the armor and consume kit
+            if (obj.ArmorMana < 50)
+            {
+                if (obj.ArmorMana <= 0)
+                {
+                    if (!session.Player.TryConsumeFromInventoryWithNetworking(5000000, 10))
+                    {
+                        session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] You could not repair {obj.NameWithMaterial} because you didn't have 10 Armor Repair Kits available.", ChatMessageType.System));
+                        return;
+                    }
+                    else
+                    {
+                        session.Player.TryConsumeFromInventoryWithNetworking(5000000, 10);
+                        obj.ArmorMana = 100;
+                        obj.LongDesc = $"Armor Mana: {obj.ArmorMana}/100";
+                        session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Success] Your {obj.NameWithMaterial} has been repaired, consuming 10 Armor Mana Repair Kits", ChatMessageType.System));
+                        return;
+                    }
+                }
+                else
+                {
+                    obj.ArmorMana = 100;
+                    obj.LongDesc = $"Armor Mana: {obj.ArmorMana}/100";
+                    session.Player.TryConsumeFromInventoryWithNetworking(5000000, 1);
+                    session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Success] Your {obj.NameWithMaterial} has been repaired.", ChatMessageType.System));
+                }
+            }
+        }
+
+            // quest info (uses GDLe formatting to match plugin expectations)
+            [CommandHandler("myquests", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, "Shows your quest log")]
         public static void HandleQuests(Session session, params string[] parameters)
         {
             if (!PropertyManager.GetBool("quest_info_enabled").Item)

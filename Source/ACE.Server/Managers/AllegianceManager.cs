@@ -263,13 +263,13 @@ namespace ACE.Server.Managers
             var timeRealAvg = Math.Min(RealCap, RealCap);
             var timeGameAvg = Math.Min(GameCap, GameCap);
 
-            var vassalFactor = Math.Min(0.25f * patronNode.TotalVassals, 1.0f);
+            //var vassalFactor = 4; //Math.Min(0.25f * patronNode.TotalVassals, 1.0f);
 
-            var factor1 = direct ? 50.0f : 16.0f;
-            var factor2 = direct ? 22.5f : 8.0f;
+            var factor1 = direct ? 50.0f : 35.0f;
+            var factor2 = direct ? 50.0f : 35.0f;
 
             var generated = (factor1 + factor2 * (loyalty / SkillCap) * (1.0f + (timeReal / RealCap) * (timeGame / GameCap))) * 0.01f;
-            var received = (factor1 + factor2 * (leadership / SkillCap) * (1.0f + vassalFactor * (timeRealAvg / RealCap) * (timeGameAvg / GameCap))) * 0.01f;
+            var received = (factor1 + factor2 * (leadership / SkillCap) * (1.0f + (timeReal / RealCap) * (timeGame / GameCap))) * 0.01f;
             var passup = generated * received;
 
             var generatedAmount = (uint)(amount * generated);
@@ -301,7 +301,7 @@ namespace ACE.Server.Managers
                     onlinePatron.AddAllegianceXP();
 
                 // call recursively
-                PassXP(patronNode, passupAmount, false);
+                PassXP(patronNode, amount, false);
             }
         }
 

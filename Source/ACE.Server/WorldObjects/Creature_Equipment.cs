@@ -136,6 +136,14 @@ namespace ACE.Server.WorldObjects
         }
 
         /// <summary>
+        /// Returns the currently equipped secondary weapon
+        /// </summary>
+        public WorldObject GetArmorMana()
+        {
+            return EquippedObjects.Values.FirstOrDefault(e => e.ArmorMana > 0 && e.CurrentWieldedLocation == EquipMask.Armor);
+        }
+
+        /// <summary>
         /// Returns the currently equipped wand
         /// </summary>
         public WorldObject GetEquippedWand()
@@ -205,7 +213,8 @@ namespace ACE.Server.WorldObjects
 
         private void AddItemToEquippedItemsRatingCache(WorldObject wo)
         {
-            if ((wo.GearDamage ?? 0) == 0 && (wo.GearDamageResist ?? 0) == 0 && (wo.GearCritDamage ?? 0) == 0 && (wo.GearCritDamageResist ?? 0) == 0 && (wo.GearHealingBoost ?? 0) == 0 && (wo.GearMaxHealth ?? 0) == 0)
+            if ((wo.GearDamage ?? 0) == 0 && (wo.GearDamageResist ?? 0) == 0 && (wo.GearCritDamage ?? 0) == 0 && (wo.GearCritDamageResist ?? 0) == 0 && (wo.GearHealingBoost ?? 0) == 0 && (wo.GearMaxHealth ?? 0) == 0
+                && (wo.GearCritResist ?? 0) == 0)
                 return;
 
             if (equippedItemsRatingCache == null)
@@ -218,6 +227,7 @@ namespace ACE.Server.WorldObjects
                     { PropertyInt.GearCritDamageResist, 0 },
                     { PropertyInt.GearHealingBoost, 0 },
                     { PropertyInt.GearMaxHealth, 0 },
+                    { PropertyInt.GearCritResist, 0 },
                 };
             }
 
@@ -227,6 +237,7 @@ namespace ACE.Server.WorldObjects
             equippedItemsRatingCache[PropertyInt.GearCritDamageResist] += (wo.GearCritDamageResist ?? 0);
             equippedItemsRatingCache[PropertyInt.GearHealingBoost] += (wo.GearHealingBoost ?? 0);
             equippedItemsRatingCache[PropertyInt.GearMaxHealth] += (wo.GearMaxHealth ?? 0);
+            equippedItemsRatingCache[PropertyInt.GearCritResist] += (wo.GearCritResist ?? 0);
         }
 
         private void RemoveItemFromEquippedItemsRatingCache(WorldObject wo)
@@ -240,6 +251,7 @@ namespace ACE.Server.WorldObjects
             equippedItemsRatingCache[PropertyInt.GearCritDamageResist] -= (wo.GearCritDamageResist ?? 0);
             equippedItemsRatingCache[PropertyInt.GearHealingBoost] -= (wo.GearHealingBoost ?? 0);
             equippedItemsRatingCache[PropertyInt.GearMaxHealth] -= (wo.GearMaxHealth ?? 0);
+            equippedItemsRatingCache[PropertyInt.GearCritResist] -= (wo.GearCritResist ?? 0);
         }
 
         public int GetEquippedItemsRatingSum(PropertyInt rating)

@@ -187,10 +187,10 @@ namespace ACE.Server.WorldObjects
             set { if (!value.HasValue) RemoveProperty(PropertyInt.DeathLevel); else SetProperty(PropertyInt.DeathLevel, value.Value); }
         }
 
-        public int? VitaeCpPool
+        public long? VitaeCpPool
         {
-            get => GetProperty(PropertyInt.VitaeCpPool);
-            set { if (!value.HasValue) RemoveProperty(PropertyInt.VitaeCpPool); else SetProperty(PropertyInt.VitaeCpPool, value.Value); }
+            get => GetProperty(PropertyInt64.VitaeCpPool);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt64.VitaeCpPool); else SetProperty(PropertyInt64.VitaeCpPool, value.Value); }
         }
 
         public bool HasVitae => EnchantmentManager.HasVitae;
@@ -1265,6 +1265,132 @@ namespace ACE.Server.WorldObjects
         {
             get => GetProperty(PropertyInstanceId.CurrentAppraisalTarget);
             set { if (!value.HasValue) RemoveProperty(PropertyInstanceId.CurrentAppraisalTarget); else SetProperty(PropertyInstanceId.CurrentAppraisalTarget, value.Value); }
+        }
+
+        public int RaisedStr
+        {
+            get => GetProperty(PropertyInt.RaisedStr) ?? 1;
+            set { if (value == 0) RemoveProperty(PropertyInt.RaisedStr); else SetProperty(PropertyInt.RaisedStr, value); }
+        }
+
+        public int RaisedEnd
+        {
+            get => GetProperty(PropertyInt.RaisedEnd) ?? 1;
+            set { if (value == 0) RemoveProperty(PropertyInt.RaisedEnd); else SetProperty(PropertyInt.RaisedEnd, value); }
+        }
+
+        public int RaisedCoord
+        {
+            get => GetProperty(PropertyInt.RaisedCoord) ?? 1;
+            set { if (value == 0) RemoveProperty(PropertyInt.RaisedCoord); else SetProperty(PropertyInt.RaisedCoord, value); }
+        }
+
+        public int RaisedQuick
+        {
+            get => GetProperty(PropertyInt.RaisedQuick) ?? 1;
+            set { if (value == 0) RemoveProperty(PropertyInt.RaisedQuick); else SetProperty(PropertyInt.RaisedQuick, value); }
+        }
+
+        public int RaisedFocus
+        {
+            get => GetProperty(PropertyInt.RaisedFocus) ?? 1;
+            set { if (value == 0) RemoveProperty(PropertyInt.RaisedFocus); else SetProperty(PropertyInt.RaisedFocus, value); }
+        }
+
+        public int RaisedSelf
+        {
+            get => GetProperty(PropertyInt.RaisedSelf) ?? 1;
+            set { if (value == 0) RemoveProperty(PropertyInt.RaisedSelf); else SetProperty(PropertyInt.RaisedSelf, value); }
+        }
+
+        public long? TotalXpBeyond
+        {
+            get => GetProperty(PropertyInt64.TotalXpBeyond);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt64.TotalXpBeyond); else SetProperty(PropertyInt64.TotalXpBeyond, value.Value); }
+        }
+
+        public int? QuestPoints
+        {
+            get => GetProperty(PropertyInt.QuestPoints);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.QuestPoints); else SetProperty(PropertyInt.QuestPoints, value.Value); }
+        }
+
+        public int? QuestPointsSpent
+        {
+            get => GetProperty(PropertyInt.QuestPointsSpent);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.QuestPointsSpent); else SetProperty(PropertyInt.QuestPointsSpent, value.Value); }
+        }
+
+        public int? XPBonus
+        {
+            get => GetProperty(PropertyInt.XPBonus);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.XPBonus); else SetProperty(PropertyInt.XPBonus, value.Value); }
+        }
+
+        public int? XPBonusTick
+        {
+            get => GetProperty(PropertyInt.XPBonusTick);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.XPBonusTick); else SetProperty(PropertyInt.XPBonusTick, value.Value); }
+        }
+
+        public int? LXPBonus
+        {
+            get => GetProperty(PropertyInt.LXPBonus);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.LXPBonus); else SetProperty(PropertyInt.LXPBonus, value.Value); }
+        }
+
+        public int? LXPBonusTick
+        {
+            get => GetProperty(PropertyInt.LXPBonusTick);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.LXPBonusTick); else SetProperty(PropertyInt.LXPBonusTick, value.Value); }
+        }
+
+        public int? AllegianceBonusDamageRating
+        {
+            get => GetProperty(PropertyInt.AllegianceBonusDamageRating);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.AllegianceBonusDamageRating); else SetProperty(PropertyInt.AllegianceBonusDamageRating, value.Value); }
+        }
+
+        public int? AllegianceBonusDamageResistRating
+        {
+            get => GetProperty(PropertyInt.AllegianceBonusDamageResistRating);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.AllegianceBonusDamageResistRating); else SetProperty(PropertyInt.AllegianceBonusDamageResistRating, value.Value); }
+        }
+
+        public double? QuestPointTimer
+        {
+            get => GetProperty(PropertyFloat.QuestPointTimer);
+            set { if (!value.HasValue) RemoveProperty(PropertyFloat.QuestPointTimer); else SetProperty(PropertyFloat.QuestPointTimer, value.Value); }
+        }
+
+        public int? LKey
+        {
+            get => GetProperty(PropertyInt.LKey);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.LKey); else SetProperty(PropertyInt.LKey, value.Value); }
+        }
+
+        public int? LKeyClaims
+        {
+            get => GetProperty(PropertyInt.LKeyClaims);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.LKeyClaims); else SetProperty(PropertyInt.LKeyClaims, value.Value); }
+        }
+
+        public double? AllegianceLKeyTimer
+        {
+            get => GetProperty(PropertyFloat.AllegianceLKeyTimer);
+            set { if (!value.HasValue) RemoveProperty(PropertyFloat.AllegianceLKeyTimer); else SetProperty(PropertyFloat.AllegianceLKeyTimer, value.Value); }
+        }
+
+        public int? AugLimiter
+        {
+            get => GetProperty(PropertyInt.AugLimiter);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.AugLimiter); else SetProperty(PropertyInt.AugLimiter, value.Value); }
+        }
+
+        public int? LastLevel
+        {
+            get => GetProperty(PropertyInt.LastLevel);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.LastLevel); else SetProperty(PropertyInt.LastLevel, value.Value); }
         }
 
         /// <summary>

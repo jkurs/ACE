@@ -179,7 +179,7 @@ namespace ACE.Entity.Enum.Properties
         VendorHappyVariance                      = 127,
         CloakStatus                              = 128,
         [SendOnLogin]
-        VitaeCpPool                              = 129,
+        //VitaeCpPool                              = 129,
         NumServicesSold                          = 130,
         MaterialType                             = 131,
         [SendOnLogin]
@@ -626,6 +626,46 @@ namespace ACE.Entity.Enum.Properties
         /// </summary>
         [ServerOnly]
         InventoryOrder                          = 9015,
+        [ServerOnly]
+        RaisedStr                               = 9016,
+        [ServerOnly]
+        RaisedEnd                               = 9017,
+        [ServerOnly]
+        RaisedCoord                             = 9018,
+        [ServerOnly]
+        RaisedQuick                             = 9019,
+        [ServerOnly]
+        RaisedFocus                             = 9020,
+        [ServerOnly]
+        RaisedSelf                              = 9021,
+        [ServerOnly]
+        ArmorMana                               = 9022,
+        [ServerOnly]
+        SlayerAdded                             = 9023,
+        [ServerOnly]
+        QuestPoints                             = 9024,
+        [ServerOnly]
+        XPBonus                                 = 9025,
+        [ServerOnly]
+        XPBonusTick                             = 9026,
+        [ServerOnly]
+        AllegianceBonusDamageRating             = 9027,
+        [ServerOnly]
+        AllegianceBonusDamageResistRating       = 9028,
+        [ServerOnly]
+        LXPBonus                                = 9029,
+        [ServerOnly]
+        LXPBonusTick                            = 9030,
+        [ServerOnly]
+        LKey                                    = 9031,
+        [ServerOnly]
+        LKeyClaims                              = 9032,
+        [ServerOnly]
+        AugLimiter                              = 9033,
+        [ServerOnly]
+        QuestPointsSpent                        = 9034,
+        [ServerOnly]
+        LastLevel                               = 9035
     }
 
     public static class PropertyIntExtensions

@@ -77,6 +77,21 @@ namespace ACE.Server.Entity
 
         int? HouseRentTimestamp { get; set; }
 
+        int? QuestPoints { get; set; }
+
+        int? XPBonus { get; set; }
+
+        int? XPBonusTick { get; set; }
+
+        int? LXPBonus { get; set; }
+
+        int? LXPBonusTick { get; set; }
+
+        int? LKey { get; set; }
+
+        int? AllegianceBonusDamageRating { get; set; }
+
+        int? AllegianceBonusDamageResistRating { get; set; }
 
         uint GetCurrentLoyalty();
 

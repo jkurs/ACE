@@ -158,7 +158,11 @@ namespace ACE.Server.Factories
             //if (wo.HasMutateFilter(MutateFilter.Value))   // fixme: data
                 MutateValue(wo, profile.Tier, roll);
 
-            wo.LongDesc = GetLongDesc(wo);
+            //wo.LongDesc = GetLongDesc(wo);
+
+            wo.SetProperty(PropertyInt.ArmorMana, 100);
+
+            wo.LongDesc = $"Armor Mana: {wo.ArmorMana}/100";
         }
 
         private static bool AssignArmorLevel_New(WorldObject wo, TreasureDeath profile, TreasureRoll roll)

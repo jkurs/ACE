@@ -641,6 +641,8 @@ namespace ACE.Server.Managers
                 ("vitae_penalty", new Property<double>(0.05, "the amount of vitae penalty a player gets per death")),
                 ("vitae_penalty_max", new Property<double>(0.40, "the maximum vitae penalty a player can have")),
                 ("void_pvp_modifier", new Property<double>(0.5, "Scales the amount of damage players take from Void Magic. Defaults to 0.5, as per retail. For earlier content where DRR isn't as readily available, this can be adjusted for balance.")),
+                ("monster_damage", new Property<double>(1.5, "Scales the amount of physical damage monsters do to a player.")),
+                ("monster_magic", new Property<double>(1.2, "Scales the amount of magical damage monsters do to a player")),
                 ("xp_modifier", new Property<double>(1.0, "scales the amount of xp received by players"))
                 );
 

@@ -517,6 +517,7 @@ namespace ACE.Server.Factories
             }
         }
 
+        // players start with foci augs
         private static void SetInnateAugmentations(Player player)
         {
             switch (player.HeritageGroup)
@@ -526,31 +527,73 @@ namespace ACE.Server.Factories
                 case HeritageGroup.Sho:
                 case HeritageGroup.Viamontian:
                     player.AugmentationJackOfAllTrades = 1;
+
+                    player.AugmentationInfusedCreatureMagic = 1;
+                    player.AugmentationInfusedLifeMagic = 1;
+                    player.AugmentationInfusedItemMagic = 1;
+                    player.AugmentationInfusedWarMagic = 1;
+                    player.AugmentationInfusedVoidMagic = 1;
                     break;
 
                 case HeritageGroup.Shadowbound:
                 case HeritageGroup.Penumbraen:
                     player.AugmentationCriticalExpertise = 1;
+
+                    player.AugmentationInfusedCreatureMagic = 1;
+                    player.AugmentationInfusedLifeMagic = 1;
+                    player.AugmentationInfusedItemMagic = 1;
+                    player.AugmentationInfusedWarMagic = 1;
+                    player.AugmentationInfusedVoidMagic = 1;
                     break;
 
                 case HeritageGroup.Gearknight:
                     player.AugmentationDamageReduction = 1;
+
+                    player.AugmentationInfusedCreatureMagic = 1;
+                    player.AugmentationInfusedLifeMagic = 1;
+                    player.AugmentationInfusedItemMagic = 1;
+                    player.AugmentationInfusedWarMagic = 1;
+                    player.AugmentationInfusedVoidMagic = 1;
                     break;
 
                 case HeritageGroup.Undead:
                     player.AugmentationCriticalDefense = 1;
+
+                    player.AugmentationInfusedCreatureMagic = 1;
+                    player.AugmentationInfusedLifeMagic = 1;
+                    player.AugmentationInfusedItemMagic = 1;
+                    player.AugmentationInfusedWarMagic = 1;
+                    player.AugmentationInfusedVoidMagic = 1;
                     break;
 
                 case HeritageGroup.Empyrean:
                     player.AugmentationInfusedLifeMagic = 1;
+
+                    player.AugmentationInfusedCreatureMagic = 1;
+                    player.AugmentationInfusedLifeMagic = 1;
+                    player.AugmentationInfusedItemMagic = 1;
+                    player.AugmentationInfusedWarMagic = 1;
+                    player.AugmentationInfusedVoidMagic = 1;
                     break;
 
                 case HeritageGroup.Tumerok:
                     player.AugmentationCriticalPower = 1;
+
+                    player.AugmentationInfusedCreatureMagic = 1;
+                    player.AugmentationInfusedLifeMagic = 1;
+                    player.AugmentationInfusedItemMagic = 1;
+                    player.AugmentationInfusedWarMagic = 1;
+                    player.AugmentationInfusedVoidMagic = 1;
                     break;
 
                 case HeritageGroup.Lugian:
                     player.AugmentationIncreasedCarryingCapacity = 1;
+
+                    player.AugmentationInfusedCreatureMagic = 1;
+                    player.AugmentationInfusedLifeMagic = 1;
+                    player.AugmentationInfusedItemMagic = 1;
+                    player.AugmentationInfusedWarMagic = 1;
+                    player.AugmentationInfusedVoidMagic = 1;
                     break;
 
                 case HeritageGroup.Olthoi:

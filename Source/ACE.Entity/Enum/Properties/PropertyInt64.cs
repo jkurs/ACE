@@ -21,6 +21,8 @@ namespace ACE.Entity.Enum.Properties
         [SendOnLogin]
         MaximumLuminance    = 7,
         InteractionReqs     = 8,
+        [SendOnLogin]
+        VitaeCpPool         = 129,
 
         /* custom */
         [ServerOnly]
@@ -30,7 +32,9 @@ namespace ACE.Entity.Enum.Properties
         [ServerOnly]
         AllegianceXPReceived  = 9002,
         [ServerOnly]
-        VerifyXp              = 9003
+        VerifyXp              = 9003,
+        [ServerOnly]
+        TotalXpBeyond         = 9004
     }
 
     public static class PropertyInt64Extensions

@@ -201,7 +201,7 @@ namespace ACE.Server.WorldObjects
 
                 var addedValue = (int)Math.Round((item.Value ?? 0) * valueFactor);
 
-                salvageBag.Value = Math.Min((salvageBag.Value ?? 0) + addedValue, 75000);
+                salvageBag.Value = Math.Min((salvageBag.Value ?? 0) + addedValue, 100000);
 
                 // a bit different here, since ACE handles overages
                 if (message != null)
@@ -324,7 +324,7 @@ namespace ACE.Server.WorldObjects
             // https://web.archive.org/web/20170130213649/http://www.thejackcat.com/AC/Shopping/Crafts/Salvage_old.htm
             // https://web.archive.org/web/20170130194012/http://www.thejackcat.com/AC/Shopping/Crafts/Salvage.htm
 
-            return 1 + (int)Math.Floor(skill / 194.0f * workmanship * (1.0f + 0.25f * numAugs));
+            return 1 + (int)Math.Floor(skill / 194.0f * workmanship * (1.0f + 0.75f * numAugs));
         }
 
         public WorldObject GetSalvageBag(MaterialType materialType, List<WorldObject> salvageBags)

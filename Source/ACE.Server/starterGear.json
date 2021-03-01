@@ -49,8 +49,13 @@
                     "stacksize": "10000"
                 },
                 {
-                    "weenieId": "166",
-                    "name": "Sack",
+                    "weenieId": "5000001",
+                    "name": "Pack",
+                    "stacksize": "1"
+                },
+                {
+                    "weenieId": "5000002",
+                    "name": "Pack",
                     "stacksize": "1"
                 },
                 {
@@ -273,11 +278,6 @@
                     "stacksize": "1"
                 },
                 {
-                    "weenieId": "15268",
-                    "name": "Foci of Enchantment",
-                    "stacksize": "1"
-                },
-                {
                     "weenieId": "691",
                     "name": "Lead Scarab",
                     "stacksize": "5"
@@ -323,11 +323,6 @@
                 {
                     "weenieId": "12748",
                     "name": "Training Wand",
-                    "stacksize": "1"
-                },
-                {
-                    "weenieId": "15269",
-                    "name": "Foci of Artifice",
                     "stacksize": "1"
                 },
                 {
@@ -381,11 +376,6 @@
                 {
                     "weenieId": "12748",
                     "name": "Training Wand",
-                    "stacksize": "1"
-                },
-                {
-                    "weenieId": "15270",
-                    "name": "Foci of Verdancy",
                     "stacksize": "1"
                 },
                 {
@@ -444,11 +434,6 @@
                 {
                     "weenieId": "12748",
                     "name": "Training Wand",
-                    "stacksize": "1"
-                },
-                {
-                    "weenieId": "15271",
-                    "name": "Foci of Strife",
                     "stacksize": "1"
                 },
                 {
@@ -608,11 +593,6 @@
                 {
                     "weenieId": "12748",
                     "name": "Training Wand",
-                    "stacksize": "1"
-                },
-                {
-                    "weenieId": "43173",
-                    "name": "Foci of Shadow",
                     "stacksize": "1"
                 },
                 {

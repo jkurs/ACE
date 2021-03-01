@@ -123,11 +123,11 @@ namespace ACE.Server.WorldObjects
                             specializedCost = heritageAdjustedCost.PrimaryCost;
                     }
 
-                    if (GetTotalSpecializedCredits(player) + specializedCost > 70)
+                    /*if (GetTotalSpecializedCredits(player) + specializedCost > 70)
                     {
                         player.Session.Network.EnqueueSend(new GameEventWeenieErrorWithString(player.Session, WeenieErrorWithString.TooManyCreditsInSpecializedSkills, skill.Skill.ToSentence()));
                         return false;
-                    }
+                    }*/
                     break;
 
                 // Gem of Forgetfulness

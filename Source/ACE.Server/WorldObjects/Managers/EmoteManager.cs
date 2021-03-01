@@ -129,8 +129,18 @@ namespace ACE.Server.WorldObjects.Managers
                     min = emote.Min64 ?? emote.Min ?? 0;
                     max = emote.Max64 ?? emote.Max ?? 0;
 
-                    if (player != null)
-                        player.GrantLevelProportionalXp(emote.Percent ?? 0, min, max, shareXP);
+                    if (WorldObject.WeenieClassId == 9495 || WorldObject.WeenieClassId == 9496 || WorldObject.WeenieClassId == 9497)
+                    {
+                        max = 50000000L;
+
+                        if (player != null)
+                            player.GrantLevelProportionalXp(emote.Percent ?? 0, min, max, true);
+                    }
+                    else
+                    {
+                        if (player != null)
+                            player.GrantLevelProportionalXp(emote.Percent ?? 0, min, max, shareXP);
+                    }
                     break;
 
                 case EmoteType.AwardLuminance:
@@ -143,7 +153,7 @@ namespace ACE.Server.WorldObjects.Managers
                 case EmoteType.AwardNoShareXP:
 
                     if (player != null)
-                        player.EarnXP(emote.Amount64 ?? emote.Amount ?? 0, XpType.Quest, ShareType.None);
+                        player.EarnXP(emote.Amount64 ?? emote.Amount ?? 0, XpType.Quest, ShareType.Fellowship);
 
                     break;
 
@@ -536,6 +546,10 @@ namespace ACE.Server.WorldObjects.Managers
                         else
                         {
                             stat ??= 0;
+
+                            if (emote.Stat == 25)
+                                emote.Max = 90000;
+
                             success = stat >= (emote.Min ?? int.MinValue) && stat <= (emote.Max ?? int.MaxValue);
                             ExecuteEmoteSet(success ? EmoteCategory.TestSuccess : EmoteCategory.TestFailure, emote.Message, targetObject, true);
                         }
@@ -1231,6 +1245,14 @@ namespace ACE.Server.WorldObjects.Managers
                             log.Warn($"0x{WorldObject.Guid}:{WorldObject.Name} ({WorldObject.WeenieClassId}).EmoteManager.ExecuteEmote: EmoteType.StampQuest({questName}) is a depreciated kill task method.");
 
                         questTarget.QuestManager.Stamp(emote.Message);
+
+                        var player1 = targetObject as Player;
+
+                        if (player1 != null)
+                        {
+                            if (player1.Level >= 50)
+                                player1.QuestPointAdd(emote.Message, WorldObject);
+                        }
                     }
                     break;
 

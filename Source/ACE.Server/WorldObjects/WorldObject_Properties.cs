@@ -3047,5 +3047,16 @@ namespace ACE.Server.WorldObjects
             get => GetProperty(PropertyInt.ResistItemAppraisal);
             set { if (!value.HasValue) RemoveProperty(PropertyInt.ResistItemAppraisal); else SetProperty(PropertyInt.ResistItemAppraisal, value.Value); }
         }
+
+        public int? ArmorMana
+        {
+            get => GetProperty(PropertyInt.ArmorMana);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.ArmorMana); else SetProperty(PropertyInt.ArmorMana, value.Value); }
+        }
+        public int? SlayerAdded
+        {
+            get => GetProperty(PropertyInt.SlayerAdded);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.SlayerAdded); else SetProperty(PropertyInt.SlayerAdded, value.Value); }
+        }
     }
 }
