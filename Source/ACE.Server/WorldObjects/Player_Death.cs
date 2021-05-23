@@ -141,12 +141,16 @@ namespace ACE.Server.WorldObjects
         }
 
 
+        private bool isInDeathProcess;
+
         /// <summary>
         /// Broadcasts the player death animation, updates vitae, and sends network messages for player death
         /// Queues the action to call TeleportOnDeath and enter portal space soon
         /// </summary>
         protected override void Die(DamageHistoryInfo lastDamager, DamageHistoryInfo topDamager)
         {
+            isInDeathProcess = true;
+
             if (topDamager?.Guid == Guid && IsPKType)
             {
                 var topDamagerOther = DamageHistory.GetTopDamager(false);
@@ -242,7 +246,8 @@ namespace ACE.Server.WorldObjects
                 SetLifestoneProtection();
 
                 var teleportChain = new ActionChain();
-                teleportChain.AddDelaySeconds(3.0f);
+                if (!IsLoggingOut) // If we're in the process of logging out, we skip the delay
+                    teleportChain.AddDelaySeconds(3.0f);
                 teleportChain.AddAction(this, () =>
                 {
                     // currently happens while in portal space
@@ -264,6 +269,11 @@ namespace ACE.Server.WorldObjects
                     DamageHistory.Reset();
 
                     OnHealthUpdate();
+
+                    isInDeathProcess = false;
+
+                    if (IsLoggingOut)
+                        LogOut_Final(true);
                 });
 
                 teleportChain.EnqueueChain();

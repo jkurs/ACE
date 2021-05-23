@@ -806,7 +806,7 @@ namespace ACE.Server.WorldObjects
                 var stopCompletely = !MagicState.CastMotionDone;
                 //var stopCompletely = true;
 
-                CreateTurnToChain2(target, null, stopCompletely, MagicState.AlwaysTurn);
+                CreateTurnToChain2(target, null, null, stopCompletely, MagicState.AlwaysTurn);
 
                 MagicState.AlwaysTurn = false;
             }
@@ -1230,7 +1230,8 @@ namespace ACE.Server.WorldObjects
 
         public void TryBurnComponents(Spell spell)
         {
-            if (SafeSpellComponents) return;
+            if (SafeSpellComponents || PropertyManager.GetBool("safe_spell_comps").Item)
+                return;
 
             var burned = spell.TryBurnComponents(this);
             if (burned.Count == 0) return;
