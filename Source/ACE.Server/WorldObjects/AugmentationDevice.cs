@@ -168,11 +168,11 @@ namespace ACE.Server.WorldObjects
                 var playerAttribute = player.Attributes[AugTypeHelper.GetAttribute(type)];
 
                 // check InitLevel
-                if (playerAttribute.StartingValue >= 100)
+                /*if (playerAttribute.StartingValue >= 100)
                 {
                     player.SendWeenieErrorWithString(WeenieErrorWithString.AugmentationSkillNotTrained, $"You are not able to purchase this augmentation because your {playerAttribute.Attribute.ToString()} is already at the maximum innate level!");
                     return false;
-                }
+                }*/
             }
             else if (AugTypeHelper.IsSkill(type))
             {

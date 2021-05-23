@@ -319,6 +319,36 @@ namespace ACE.Server.Entity
             set { if (!value.HasValue) RemoveProperty(PropertyInt.LKey); else SetProperty(PropertyInt.LKey, value.Value); }
         }
 
+        public int? LKeyClaims
+        {
+            get => GetProperty(PropertyInt.LKeyClaims);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.LKeyClaims); else SetProperty(PropertyInt.LKeyClaims, value.Value); }
+        }
+
+        public double? AllegianceLKeyTimer
+        {
+            get => GetProperty(PropertyFloat.AllegianceLKeyTimer);
+            set { if (!value.HasValue) RemoveProperty(PropertyFloat.AllegianceLKeyTimer); else SetProperty(PropertyFloat.AllegianceLKeyTimer, value.Value); }
+        }
+
+        public int? BankAccountNumber
+        {
+            get => GetProperty(PropertyInt.BankAccountNumber);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.BankAccountNumber); else SetProperty(PropertyInt.BankAccountNumber, value.Value); }
+        }
+
+        public long? BankedPyreals
+        {
+            get => GetProperty(PropertyInt64.BankedPyreals);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt64.BankedPyreals); else SetProperty(PropertyInt64.BankedPyreals, value.Value); }
+        }
+
+        public long? BankedLuminance
+        {
+            get => GetProperty(PropertyInt64.BankedLuminance);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt64.BankedLuminance); else SetProperty(PropertyInt64.BankedLuminance, value.Value); }
+        }
+
         public Allegiance Allegiance { get; set; }
 
         public AllegianceNode AllegianceNode { get; set; }

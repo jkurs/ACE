@@ -211,9 +211,9 @@ namespace ACE.Server.WorldObjects.Entity
                     break;
             }
 
-            // skills go up +10 per enlightenment
+            // skills go up +1 per enlightenment
             if (AdvancementClass >= SkillAdvancementClass.Trained && player.Enlightenment != 0)
-                total += 10U * (uint)player.Enlightenment;
+                total += (uint)player.Enlightenment;
 
             return total;
         }

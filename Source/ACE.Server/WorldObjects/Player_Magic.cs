@@ -1236,6 +1236,17 @@ namespace ACE.Server.WorldObjects
             var burned = spell.TryBurnComponents(this);
             if (burned.Count == 0) return;
 
+            if (CompBurnAug.HasValue)
+            {
+                var compBurnAug = 1.00f - (float)CompBurnAug * 0.01f;
+                var compBurnAugClamp = ThreadSafeRandom.Next(0.00f, 1.00f);
+                if (compBurnAugClamp >= compBurnAug && burned.Count > 0)
+                {
+                    Session.Network.EnqueueSend(new GameMessageSystemChat($"You avoided burning spell components with your augmentation. ({CompBurnAug}%)", ChatMessageType.Magic));
+                    return;
+                }
+            }
+
             // decrement components
             for (var i = burned.Count - 1; i >= 0; i--)
             {

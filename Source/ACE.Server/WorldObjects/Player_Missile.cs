@@ -1,6 +1,6 @@
 using System;
 using System.Numerics;
-
+using ACE.Common;
 using ACE.Entity.Enum;
 using ACE.Server.Entity.Actions;
 using ACE.Server.Network.GameEvent.Events;
@@ -338,7 +338,21 @@ namespace ACE.Server.WorldObjects
             if (ammo.StackSize == null || ammo.StackSize <= 1)
                 TryDequipObjectWithNetworking(ammo.Guid, out _, DequipObjectAction.ConsumeItem);
             else
+            {
+                if (MissileConsumeAug != null)
+                {
+                    var ammoConsumeAug = 1.00f - (float)MissileConsumeAug * 0.01f;
+                    var ammoConsumeAugClamp = ThreadSafeRandom.Next(0.00f, 1.00f);
+
+                    if (ammoConsumeAugClamp >= ammoConsumeAug)
+                    {
+                        Session.Network.EnqueueSend(new GameMessageSystemChat($"You avoided consuming a missile with your augmentation. ({MissileConsumeAug}%)", ChatMessageType.Magic));
+                        return;
+                    }
+                }
+
                 TryConsumeFromInventoryWithNetworking(ammo, 1);
+            }
         }
 
         public bool TargetInRange(WorldObject target)

@@ -65,12 +65,14 @@ namespace ACE.Server.Entity
             if (player.Level < 400)
             {
                 player.Session.Network.EnqueueSend(new GameMessageSystemChat($"You must be level 300 for enlightenment.", ChatMessageType.Broadcast));
+                player.QuestManager.Erase("Trance1");
                 return false;
             }
 
             if (player.GetFreeInventorySlots() < 25)
             {
                 player.Session.Network.EnqueueSend(new GameMessageSystemChat($"You must have at least 25 free inventory slots in your main pack for enlightenment.", ChatMessageType.Broadcast));
+                player.QuestManager.Erase("Trance1");
                 return false;
             }
 
@@ -111,7 +113,7 @@ namespace ACE.Server.Entity
 
         public static void RemoveAbility(Player player)
         {
-            RemoveAetheria(player);
+            //RemoveAetheria(player);
             RemoveAttributes(player);
             RemoveSkills(player);
             RemoveLevel(player);
@@ -342,15 +344,16 @@ namespace ACE.Server.Entity
             }
 
             if (player.Enlightenment > 5)
-                lvl = $"{player.Enlightenment}th";
+                lvl = $"{player.Enlightenment}";
 
-            var msg = $"{player.Name} has achieved the {lvl} level of Enlightenment!";
+            var msg = $"{player.Name} has achieved level {lvl} Enlightenment!";
             PlayerManager.BroadcastToAll(new GameMessageSystemChat(msg, ChatMessageType.WorldBroadcast));
             PlayerManager.LogBroadcastChat(Channel.AllBroadcast, null, msg);
 
             player.QuestManager.Erase("Trance1");
-            player.TotalXpBeyond = 0;
             player.LastLevel = 1;
+            player.TotalXpBeyond = null;
+
             // +2 vitality
             // handled automatically via PropertyInt.Enlightenment * 2
 

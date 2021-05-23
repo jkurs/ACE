@@ -43,12 +43,14 @@ namespace ACE.Server.WorldObjects
             //additive enlightenment bonus with enchantments.
             var enlightenBonus = 0.25f * Enlightenment; // 25% XP bonus per enlightenment
 
+            float achievementBonus = 1.0f + 0.03f * (float)AchievementCount; // 3% bonus per achievement point
+
             // should this be passed upstream to fellowship / allegiance?
             var enchantment = GetXPAndLuminanceModifier(xpType) + allegianceBonusXP + enlightenBonus;
 
             //Session.Network.EnqueueSend(new GameMessageSystemChat($"total {enchantment} - Alleg {allegianceBonusXP} - ENL {enlightenBonus}", ChatMessageType.Broadcast));
 
-            var m_amount = (long)Math.Round(amount * enchantment * modifier);
+            var m_amount = (long)Math.Round(amount * enchantment * achievementBonus * modifier);
 
             if (m_amount < 0)
             {
@@ -415,8 +417,8 @@ namespace ACE.Server.WorldObjects
                 var incrementxp = Math.Round(191226310247UL / 56UL * (double)(1.10f + ((Level - 275) * 0.10f))); // allows for a more dynamic increase per level.
 
                 if (Level > startingLevel)
-                {                    
-                    if (!TotalXpBeyond.HasValue)
+                {
+                    if (!TotalXpBeyond.HasValue || TotalXpBeyond == 0)
                         TotalXpBeyond = 191226310247 + (long)incrementxp;
                     else
                         TotalXpBeyond += (long)incrementxp;

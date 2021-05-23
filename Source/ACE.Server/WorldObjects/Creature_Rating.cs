@@ -473,6 +473,9 @@ namespace ACE.Server.WorldObjects
 
         public int GetGearMaxHealth()
         {
+            if (this is Player player)
+                return GetEquippedItemsRatingSum(PropertyInt.GearMaxHealth) + (int)(player.VitalityAug * 2);
+
             return GetEquippedItemsRatingSum(PropertyInt.GearMaxHealth);
         }
 

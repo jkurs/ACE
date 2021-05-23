@@ -177,17 +177,17 @@ namespace ACE.Server.Managers
         /// <summary>
         /// The maximum amount of leadership / loyalty
         /// </summary>
-        public static float SkillCap = 291.0f;
+        public static float SkillCap = 1000.0f;
 
         /// <summary>
         /// The maximum amount of realtime hours sworn to patron
         /// </summary>
-        public static float RealCap = 730.0f;
+        public static float RealCap = 1.0f;
 
         /// <summary>
         /// The maximum amount of in-game hours sworn to patron
         /// </summary>
-        public static float GameCap = 720.0f;
+        public static float GameCap = 20.0f;
 
         public static void PassXP(AllegianceNode vassalNode, ulong amount, bool direct)
         {

@@ -139,7 +139,7 @@ namespace ACE.Server.WorldObjects.Managers
                     else
                     {
                         if (player != null)
-                            player.GrantLevelProportionalXp(emote.Percent ?? 0, min, max, shareXP);
+                            player.GrantLevelProportionalXp(emote.Percent ?? 0, min, max, true);
                     }
                     break;
 
@@ -343,6 +343,30 @@ namespace ACE.Server.WorldObjects.Managers
                     if (player != null)
                     {
                         Enlightenment.HandleEnlightenment(WorldObject, player);
+                    }
+
+                    break;
+                case EmoteType.CustomEnlightenment:
+
+                    if (player != null)
+                    {
+                        if (player.Enlightenment >= 50)
+                        {
+                            //1
+                            var enl1 = player.Enlightenment - 49;
+
+                            // every 10 levels after 400.
+                            var reqlevel = 400 + (10 * enl1);
+
+                            if (reqlevel > player.Level)
+                            {
+                                player.Session.Network.EnqueueSend(new GameMessageSystemChat($"You do not meet the requirements to Enlighten, you must be level {reqlevel} to reach Enlightenment {player.Enlightenment + 1}.", ChatMessageType.System));
+                            }
+                            else
+                                Enlightenment.HandleEnlightenment(WorldObject, player);
+                        }
+                        else
+                            Enlightenment.HandleEnlightenment(WorldObject, player);
                     }
 
                     break;

@@ -569,6 +569,23 @@ namespace ACE.Server.WorldObjects
                     targetPlayer.Session.Network.EnqueueSend(new GameMessageSystemChat($"[MAGICAL] old {Math.Round(olddmg):N0} // new {Math.Round(finalDamage):N0} @ {PropertyManager.GetDouble("monster_magic").Item}", ChatMessageType.Broadcast));*/
             }
 
+            if (sourceCreature == sourcePlayer)
+            {
+                if (sourceCreature != null)
+                {
+                    var focus = sourceCreature.Focus.Base;
+                    var will = sourceCreature.Self.Base;
+
+                    var attributeBonusDamage = 1.0f + ((focus + will) * 0.003f);
+
+                    var olddmg = finalDamage;
+
+                    finalDamage *= attributeBonusDamage;
+                }
+                /*if (sourcePlayer != null)
+                    sourcePlayer.Session.Network.EnqueueSend(new GameMessageSystemChat($"[MAGICAL] old {Math.Round(olddmg):N0} // new {finalDamage:N0} @ ATTRIBUTE BONUS ?{1.0 + ((focus + will) * 0.0003f)} == {attributeBonusDamage}?", ChatMessageType.Broadcast));*/
+            }
+
             // show debug info
             if (sourceCreature != null && sourceCreature.DebugDamage.HasFlag(Creature.DebugDamageType.Attacker))
             {

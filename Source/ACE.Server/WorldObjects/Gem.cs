@@ -170,7 +170,12 @@ namespace ACE.Server.WorldObjects
                 player.Session.Network.EnqueueSend(new GameMessageSound(player.Guid, UseSound));
 
             if ((GetProperty(PropertyBool.UnlimitedUse) ?? false) == false)
+            {
+                if (WeenieClassId >= 6000001 && WeenieClassId <= 6000007)
+                    return;
+
                 player.TryConsumeFromInventoryWithNetworking(this, 1);
+            }
         }
 
         public bool HandleUseCreateItem(Player player)

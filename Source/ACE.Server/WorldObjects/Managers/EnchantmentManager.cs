@@ -185,6 +185,9 @@ namespace ACE.Server.WorldObjects.Managers
                 if (caster is Player player && player.AugmentationIncreasedSpellDuration > 0 && spell.DotDuration == 0)
                     duration *= 1.0f + player.AugmentationIncreasedSpellDuration * 0.2f;
 
+                if (caster is Player player1 && player1.SpellDurationAug > 0 && spell.DotDuration == 0)
+                    duration *= 1.0f + (double)(player1.SpellDurationAug * 0.2f);
+
                 var timeRemaining = refreshSpell.Duration + refreshSpell.StartTime;
 
                 if (duration > timeRemaining)
@@ -221,6 +224,9 @@ namespace ACE.Server.WorldObjects.Managers
 
                 if (caster is Player player && player.AugmentationIncreasedSpellDuration > 0 && spell.DotDuration == 0)
                     entry.Duration *= 1.0f + player.AugmentationIncreasedSpellDuration * 0.2f;
+
+                if (caster is Player player1 && player1.SpellDurationAug > 0 && spell.DotDuration == 0)
+                    entry.Duration *= 1.0f + (double)(player1.SpellDurationAug * 0.2f);
             }
             else
             {
@@ -245,7 +251,52 @@ namespace ACE.Server.WorldObjects.Managers
             entry.DegradeLimit = spell.DegradeLimit;
             entry.StatModType = spell.StatModType;
             entry.StatModKey = spell.StatModKey;
-            entry.StatModValue = spell.StatModVal;
+
+            //we modify statmodval based on the players total attributes. We ensure that only creature spells get the bonus.
+            if (caster is Player playerSpell)
+            {
+                if (spell.School == MagicSchool.CreatureEnchantment)
+                {
+                    float defaultval = spell.StatModVal;
+
+                    var focus = playerSpell.Focus.Base;
+                    var self = playerSpell.Self.Base;
+                    var str = playerSpell.Strength.Base;
+                    var end = playerSpell.Endurance.Base;
+                    var quick = playerSpell.Quickness.Base;
+                    var coord = playerSpell.Coordination.Base;
+                    var bonusSpellAmount = Math.Round((focus + self + str + end + quick + coord) * 0.005f);
+
+                    entry.StatModValue = defaultval += (float)bonusSpellAmount;
+                }
+                else
+                    entry.StatModValue = spell.StatModVal;
+            }
+            else if (equip)
+            {
+                if (Player != null)
+                {
+                    if (spell.School == MagicSchool.CreatureEnchantment)
+                    {
+                        float defaultval = spell.StatModVal;
+                        var str = Player.Strength.Base;
+                        var end = Player.Endurance.Base;
+                        var quick = Player.Quickness.Base;
+                        var coord = Player.Coordination.Base;
+                        var focus = Player.Focus.Base;
+                        var self = Player.Self.Base;
+
+                        var bonusSpellAmount = Math.Round((focus + self + str + end + quick + coord) * 0.001f);
+                        entry.StatModValue = defaultval += (float)bonusSpellAmount;
+                    }
+                    else
+                        entry.StatModValue = spell.StatModVal;
+                }
+                else
+                    entry.StatModValue = spell.StatModVal;
+            }
+            else
+                entry.StatModValue = spell.StatModVal;
 
             if (spell.DotDuration != 0)
             {

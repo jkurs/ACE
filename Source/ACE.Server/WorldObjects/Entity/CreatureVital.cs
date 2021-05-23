@@ -48,6 +48,25 @@ namespace ACE.Server.WorldObjects.Entity
 
         public uint StartingValue
         {
+            // experimental vitals per enlightenment
+            /*get
+            {
+                if (creature is Player player)
+                {
+                    if (player.Enlightenment > 0)
+                    {
+                        uint vitality = (uint)player.Enlightenment * 8;
+
+                        return propertiesAttribute2nd.InitLevel + vitality;
+                    }
+                    else
+                        return propertiesAttribute2nd.InitLevel;
+                }
+                else
+                    return propertiesAttribute2nd.InitLevel;
+
+            }*/
+
             get => propertiesAttribute2nd.InitLevel;
             set => propertiesAttribute2nd.InitLevel = value;
         }
@@ -110,7 +129,7 @@ namespace ACE.Server.WorldObjects.Entity
                 var total = StartingValue + Ranks + attr;
 
                 if (creature is Player player && Vital == PropertyAttribute2nd.MaxHealth)
-                    total += (uint)(player.Enlightenment * 10) + (uint)player.GetGearMaxHealth();
+                    total += (uint)(player.Enlightenment * 2 + player.GetGearMaxHealth());
 
                 return total;
             }
@@ -143,7 +162,7 @@ namespace ACE.Server.WorldObjects.Entity
 
                     // it's also possible these were considered "base"
                     if (Vital == PropertyAttribute2nd.MaxHealth)
-                        total += (uint)(player.Enlightenment * 10 + player.GetGearMaxHealth());
+                        total += (uint)(player.Enlightenment * 2 + player.GetGearMaxHealth());
                 }
 
                 // apply multiplicative enchantments first

@@ -323,7 +323,7 @@ namespace ACE.Server.Managers
         public static bool CanScaleQuestMinDelta(Database.Models.World.Quest quest)
         {
             if (quest.Name.StartsWith("ColoArena"))
-                return false;
+                return false;            
 
             return true;
         }

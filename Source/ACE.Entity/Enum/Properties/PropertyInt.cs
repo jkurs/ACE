@@ -668,7 +668,27 @@ namespace ACE.Entity.Enum.Properties
         [ServerOnly]
         QuestPointsSpent                        = 9034,
         [ServerOnly]
-        LastLevel                               = 9035
+        LastLevel                               = 9035,
+        [ServerOnly]
+        AchievementCount                        = 9036,
+        [ServerOnly]
+        MonsterKillCount                        = 9037,
+        [ServerOnly]
+        BankAccountNumber                       = 9038,
+        [ServerOnly]
+        CriticalStrikeAug                       = 9039,
+        [ServerOnly]
+        CriticalStrikeDamageAug                 = 9040,
+        [ServerOnly]
+        CompBurnAug                             = 9041,
+        [ServerOnly]
+        MissileConsumeAug                       = 9042,
+        [ServerOnly]
+        SpellDurationAug                        = 9043,
+        [ServerOnly]
+        VitalityAug                             = 9044,
+        [ServerOnly]
+        ArmorManaAug                            = 9045
     }
 
     public static class PropertyIntExtensions

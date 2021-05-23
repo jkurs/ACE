@@ -358,6 +358,11 @@ namespace ACE.Server.WorldObjects
             get => GetProperty(PropertyBool.CombatPetUpgraded) ?? false;
             set { if (!value) RemoveProperty(PropertyBool.CombatPetUpgraded); else SetProperty(PropertyBool.CombatPetUpgraded, value); }
         }
+        public bool UpgradedUber1
+        {
+            get => GetProperty(PropertyBool.UpgradedUber1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.UpgradedUber1); else SetProperty(PropertyBool.UpgradedUber1, value); }
+        }
         public FactionBits Society => Faction1Bits ?? FactionBits.None;
     }
 }

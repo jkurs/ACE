@@ -121,6 +121,9 @@ namespace ACE.Server.WorldObjects
                     EmoteManager.OnUse(creature);
                 }
 
+                if (WeenieClassId >= 6000001 && WeenieClassId <= 6000007)
+                    Player_GreaterLuminanceAug.ConfirmAug(false, player, this);
+
                 ActOnUse(activator);
             }
 

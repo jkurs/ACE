@@ -103,21 +103,24 @@ namespace ACE.Server.WorldObjects
                     Level = LastLevel;
             }
 
+            if (!Teleporting)
+                Player_Achievement.CheckAchievements(this);
+
             if (HasAllegiance)
             {
                 var monarch = Allegiance.Monarch.Player;
 
                 if (monarch.XPBonusTick.HasValue)
                 {
-                    long maxXp = 1000000; // 1 mill max
+                    long maxXp = 5000000; // 5 mill max
                     // divides max xp by player level to determine XP that a player will gain.
                     long totalXp = (long)Math.Round(maxXp * 0.000750 * (double)Level);
 
                     if (Level >= 275)
                         totalXp = (long)Math.Round(maxXp * 0.02 * (double)Level);
 
-                    if (totalXp > 1000000)
-                        totalXp = 1000000;
+                    if (totalXp > 5000000)
+                        totalXp = 5000000;
 
                     long amount = (long)monarch.XPBonusTick * totalXp;                    
 
@@ -134,6 +137,20 @@ namespace ACE.Server.WorldObjects
 
                 if (Time.GetUnixTime() >= AllegianceLKeyTimer && LKeyClaims >= monarch.LKey)
                 {
+                    var characters = GetAccountPlayers(Account.AccountId);
+
+                    foreach (var character in characters)
+                    {
+                        if (character.Name != Name)
+                        {
+                            if (character.AllegianceLKeyTimer.HasValue)
+                            {
+                                character.RemoveProperty(PropertyFloat.AllegianceLKeyTimer);
+                                character.RemoveProperty(PropertyInt.LKeyClaims);
+                            }
+                        }
+                    }
+
                     AllegianceLKeyTimer = null;
                     LKeyClaims = null;
                     Session.Network.EnqueueSend(new GameMessageSystemChat($"You can now claim legendary keys again from /Lkey command!", ChatMessageType.System));

@@ -653,7 +653,7 @@ namespace ACE.Server.WorldObjects
                                 item.SetProperty(PropertyInt.ArmorMana, 100);
                                 item.LongDesc = $"Armor Mana: {item.ArmorMana}/100";
 
-                                Session.Network.EnqueueSend(new GameMessageSystemChat($"Added Legendary Willpower to the quest item!", ChatMessageType.System));
+                                Session.Network.EnqueueSend(new GameMessageSystemChat($"Added Legendary Fletching to the quest item!", ChatMessageType.System));
 
                                 if (extraChance <= 15)
                                     return ModifyQuestItem(item, 3, 3, true);
@@ -1246,7 +1246,7 @@ namespace ACE.Server.WorldObjects
                             case 21:
 
                                 RecipeManager.AddSpell(this, item, SpellId.CantripFletchingProwess4);
-                                Session.Network.EnqueueSend(new GameMessageSystemChat($"Added Legendary Willpower to the quest item!", ChatMessageType.System));
+                                Session.Network.EnqueueSend(new GameMessageSystemChat($"Added Legendary Fletching to the quest item!", ChatMessageType.System));
 
                                 if (extraChance <= 15)
                                     return ModifyQuestItem(item, 1, 5, true);

@@ -220,7 +220,9 @@ namespace ACE.Entity.Enum.Properties
         [ServerOnly]
         QuestPointTimer                = 8019,
         [ServerOnly]
-        AllegianceLKeyTimer            = 8020
+        AllegianceLKeyTimer            = 8020,
+        [ServerOnly]
+        BankCommandTimer               = 8021
     }
 
     public static class PropertyFloatExtensions

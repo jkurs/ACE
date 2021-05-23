@@ -189,6 +189,230 @@ namespace ACE.Entity.Enum.Properties
         SkillTemplesTimerReset           = 9009,
         [ServerOnly]
         CombatPetUpgraded                = 9010,
+        [ServerOnly]
+        UpgradedUber1                    = 9011,
+
+        // achievements
+        [ServerOnly]
+        HP1                              = 9012,
+        [ServerOnly]
+        HP2                              = 9013,
+        [ServerOnly]
+        HP3                              = 9014,
+        [ServerOnly]
+        HP4                              = 9015,
+        [ServerOnly]
+        HP5                              = 9016,
+        [ServerOnly]
+        HP6                              = 9017,
+
+        [ServerOnly]
+        ST1                              = 9018,
+        [ServerOnly]
+        ST2                              = 9019,
+        [ServerOnly]
+        ST3                              = 9020,
+        [ServerOnly]
+        ST4                              = 9021,
+        [ServerOnly]
+        ST5                              = 9022,
+        [ServerOnly]
+        ST6                              = 9023,
+
+        [ServerOnly]
+        MA1                              = 9024,
+        [ServerOnly]
+        MA2                              = 9025,
+        [ServerOnly]
+        MA3                              = 9026,
+        [ServerOnly]
+        MA4                              = 9027,
+        [ServerOnly]
+        MA5                              = 9028,
+        [ServerOnly]
+        MA6                              = 9029,
+
+        [ServerOnly]
+        ENL1                             = 9030,
+        [ServerOnly]
+        ENL2                             = 9031,
+        [ServerOnly]
+        ENL3                             = 9032,
+        [ServerOnly]
+        ENL4                             = 9033,
+        [ServerOnly]
+        ENL5                             = 9034,
+        [ServerOnly]
+        ENL6                             = 9035,
+
+        [ServerOnly]
+        AT1                              = 9036,
+        [ServerOnly]
+        AT2                              = 9037,
+        [ServerOnly]
+        AT3                              = 9038,
+        [ServerOnly]
+        AT4                              = 9039,
+        [ServerOnly]
+        AT5                              = 9040,
+        [ServerOnly]
+        AT6                              = 9041,
+
+        [ServerOnly]
+        LV1                              = 9042,
+        [ServerOnly]
+        LV2                              = 9043,
+        [ServerOnly]
+        LV3                              = 9044,
+        [ServerOnly]
+        LV4                              = 9045,
+        [ServerOnly]
+        LV5                              = 9046,
+        [ServerOnly]
+        LV6                              = 9047,
+
+        [ServerOnly]
+        MC1                              = 9048,
+        [ServerOnly]
+        MC2                              = 9049,
+        [ServerOnly]
+        MC3                              = 9050,
+        [ServerOnly]
+        MC4                              = 9051,
+        [ServerOnly]
+        MC5                              = 9052,
+        [ServerOnly]
+        MC6                              = 9053,
+
+        [ServerOnly]
+        HMC1                             = 9054,
+        [ServerOnly]
+        HMC2                             = 9055,
+        [ServerOnly]
+        HMC3                             = 9056,
+        [ServerOnly]
+        HMC4                             = 9057,
+        [ServerOnly]
+        HMC5                             = 9058,
+        [ServerOnly]
+        HMC6                             = 9059,
+
+        [ServerOnly]
+        TS1                              = 9060,
+        [ServerOnly]
+        TS2                              = 9061,
+        [ServerOnly]
+        TS3                              = 9062,
+        [ServerOnly]
+        TS4                              = 9063,
+        [ServerOnly]
+        TS5                              = 9064,
+        [ServerOnly]
+        TS6                              = 9065,
+
+        [ServerOnly]
+        CS1                              = 9066,
+        [ServerOnly]
+        CS2                              = 9067,
+        [ServerOnly]
+        CS3                              = 9068,
+        [ServerOnly]
+        CS4                              = 9069,
+        [ServerOnly]
+        CS5                              = 9070,
+        [ServerOnly]
+        CS6                              = 9071,
+
+        [ServerOnly]
+        CSD1                             = 9072,
+        [ServerOnly]
+        CSD2                             = 9073,
+        [ServerOnly]
+        CSD3                             = 9074,
+        [ServerOnly]
+        CSD4                             = 9075,
+        [ServerOnly]
+        CSD5                             = 9076,
+        [ServerOnly]
+        CSD6                             = 9077,
+
+        [ServerOnly]
+        SCB1                             = 9078,
+        [ServerOnly]
+        SCB2                             = 9079,
+        [ServerOnly]
+        SCB3                             = 9080,
+        [ServerOnly]
+        SCB4                             = 9081,
+        [ServerOnly]
+        SCB5                             = 9082,
+        [ServerOnly]
+        SCB6                             = 9083,
+
+        [ServerOnly]
+        MAC1                             = 9084,
+        [ServerOnly]
+        MAC2                             = 9085,
+        [ServerOnly]
+        MAC3                             = 9086,
+        [ServerOnly]
+        MAC4                             = 9087,
+        [ServerOnly]
+        MAC5                             = 9088,
+        [ServerOnly]
+        MAC6                             = 9089,
+
+        [ServerOnly]
+        SD1                              = 9090,
+        [ServerOnly]
+        SD2                              = 9091,
+        [ServerOnly]
+        SD3                              = 9092,
+        [ServerOnly]
+        SD4                              = 9093,
+        [ServerOnly]
+        SD5                              = 9094,
+        [ServerOnly]
+        SD6                              = 9095,
+
+        [ServerOnly]
+        V1                               = 9096,
+        [ServerOnly]
+        V2                               = 9097,
+        [ServerOnly]
+        V3                               = 9098,
+        [ServerOnly]
+        V4                               = 9099,
+        [ServerOnly]
+        V5                               = 9100,
+        [ServerOnly]
+        V6                               = 9101,
+
+        [ServerOnly]
+        AM1                              = 9102,
+        [ServerOnly]
+        AM2                              = 9103,
+        [ServerOnly]
+        AM3                              = 9104,
+        [ServerOnly]
+        AM4                              = 9105,
+        [ServerOnly]
+        AM5                              = 9106,
+        [ServerOnly]
+        AM6                              = 9107,
+
+        [ServerOnly]
+        TAC1                             = 9108,
+        [ServerOnly]
+        TAC2                             = 9109,
+        [ServerOnly]
+        TAC3                             = 9110,
+        [ServerOnly]
+        TAC4                             = 9111,
+        [ServerOnly]
+        TAC5                             = 9112,
+        [ServerOnly]
+        TAC6                             = 9113,
     }
 
     public static class PropertyBoolExtensions

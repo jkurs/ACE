@@ -89,9 +89,19 @@ namespace ACE.Server.Entity
 
         int? LKey { get; set; }
 
+        int? LKeyClaims { get; set; }
+
+        double? AllegianceLKeyTimer { get; set; }
+
         int? AllegianceBonusDamageRating { get; set; }
 
         int? AllegianceBonusDamageResistRating { get; set; }
+
+        int? BankAccountNumber { get; set; }
+
+        long? BankedPyreals { get; set; }
+
+        long? BankedLuminance { get; set; }
 
         uint GetCurrentLoyalty();
 

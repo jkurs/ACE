@@ -53,6 +53,80 @@ namespace ACE.Server.WorldObjects
             if (questFrom.Name == "Alchemy Forge" || questFrom.Name == "Cooking Forge" || questFrom.Name == "Lockpick Forge" || questFrom.Name == "Salvaging Forge" || questFrom.Name == "Fletching Forge")
                 return;
 
+            // tusker mask fix.. all masks do this?
+            if (questname == "TuskerMask" && questname.Contains("Mask", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // GW fixes
+            if (questname == "glendeninvaderskills" || questname.Contains("glendeninvadersblockade") || questname.Contains("CaptiveTalk", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // rare exchanger fix
+            if (questname == "PaidRareExchanger")
+                return;
+
+            // FV glitch
+            if (questname == "TuskerBloodCollectionStart")
+                return;
+
+            if (questname == "FrozenFortressTestingGroundsAccess_0513" || questname == "FrozenFortressLabAccess_0513")
+                return;
+
+            // vincadi fixes & issk
+                if ((questname.Contains("raise", StringComparison.OrdinalIgnoreCase) && questname.Contains("harbinger", StringComparison.OrdinalIgnoreCase)) || questname.Contains("HarbingerCompletedWait", StringComparison.OrdinalIgnoreCase) ||
+                questname.Contains("EnterHarbingerIssk", StringComparison.OrdinalIgnoreCase) || questname.Contains("EnterHarbingerVincadi", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // restless spirit fix
+            if (questname.Contains("AssaultVaultAccessGranted", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // Ivory Crafter qp fix
+            if (questname.Contains("HamudsDemiseStarted") || questname == "InsidiousMonougaHandIn")
+                return;
+
+            // nalicana fixes
+            if (questname == "OracleLuminanceRewardsQuestStart_1110" || questname == "OraclePortalEntry")
+                return;
+
+            // sir durnstad fix
+            if (questname == "AetheriumRaidsHighStarted_0210")
+                return;
+
+            // BM fixes
+            if (questname.Contains("HizkRiEye", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // kiriel shadowborn fix
+            if (questname == "GraelIslandTempleEastAccess0606")
+                return;
+
+            // society
+            if (questname == "TaskDIBlackCoralStarted" || questname == "TaskMoarsmenArtifactsStarted" || questname == "TaskFreebooterJungleFlowerStarted" || questname == "TaskFreebooterJungleLilyStarted"
+                || questname == "TaskDIReportStarted" || questname == "TaskFreebooterMoarGlandStarted")
+                return;
+
+            // chasing oswald
+            if (questname == "ChasingOswaldRuschkIceHold" || questname == "ChasingOswaldViamontPrison" || questname == "OswaldJournal" || questname == "ChasingOswaldDungeonFlag")
+                return;
+
+            // skill/attribute reset npcs
+            if (questFrom.WeenieClassId == 42818 || questFrom.WeenieClassId == 44950)
+                return;
+
+            // ancient tablet trophies
+            if (questFrom.Name.Contains("Ancient Tablet of the Crystal", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            //colo ticket
+            if (questname == "ColoTicketPayment")
+                return;
+
+            if (questname == "ParadoxEggStarted")
+                return;
+
+            if (questname.StartsWith("TempleLiazkA") || questname.StartsWith("TempleLiazkB") || questname.StartsWith("TempleLiazkC"))
+                return;
 
             if (Time.GetUnixTime() <= QuestPointTimer && QuestPointTimer.HasValue)
             {

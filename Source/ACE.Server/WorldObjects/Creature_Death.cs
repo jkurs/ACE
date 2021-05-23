@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using ACE.Common;
 using ACE.Database;
 using ACE.Database.Models.World;
 using ACE.Entity;
@@ -173,6 +173,15 @@ namespace ACE.Server.WorldObjects
 
             if (totalHealth == 0)
                 return;
+
+            if (IsMonster && Level >= 100)
+            {
+                var player = DamageHistory.TopDamager.TryGetAttacker() as Player;
+
+                if (player != null)
+                    player.MonsterKillCount++;
+                  
+            }                
 
             foreach (var kvp in DamageHistory.TotalDamage)
             {
@@ -537,6 +546,39 @@ namespace ACE.Server.WorldObjects
                 }
             }
 
+            if (Level >= 100)
+            {
+                var emptrinket = WorldObjectFactory.CreateNewWorldObject(34276);
+                var faltrinket = WorldObjectFactory.CreateNewWorldObject(34277);
+
+                if (corpse != null)
+                {
+                    var rngthird = ThreadSafeRandom.Next(0, 2);
+                    var rng = ThreadSafeRandom.Next(0, 1);
+
+                    if (rng == 0)
+                    {
+                        if (rngthird == 0)
+                            corpse.TryAddToInventory(emptrinket);
+                        else if (rngthird > 0)
+                            corpse.TryAddToInventory(faltrinket);
+                    }
+                }
+                else
+                {
+                    var rngthird = ThreadSafeRandom.Next(0, 1);
+                    var rng = ThreadSafeRandom.Next(0, 1);
+
+                    if (rng == 0)
+                    {
+                        if (rngthird == 0)
+                            droppedItems.Add(emptrinket);
+                        else if (rngthird > 0)
+                            droppedItems.Add(faltrinket);
+                    }
+                }
+            }
+
             // contain and non-wielded treasure create
             if (Biota.PropertiesCreateList != null)
             {
@@ -552,11 +594,21 @@ namespace ACE.Server.WorldObjects
                     if (wo != null)
                     {
                         if (corpse != null)
-                            corpse.TryAddToInventory(wo);
+                        {
+                            if (wo.WeenieClassId == 34276 || wo.WeenieClassId == 34277)
+                                continue;
+                            else
+                                corpse.TryAddToInventory(wo);                            
+                        }
                         else
-                            droppedItems.Add(wo);
+                        {
+                            if (wo.WeenieClassId == 34276 || wo.WeenieClassId == 34277)
+                                continue;
+                            else
+                                droppedItems.Add(wo);                            
+                        }
                     }
-                }
+                }                
             }
 
             // move wielded treasure over, which also should include Wielded objects not marked for destroy on death.

@@ -1381,6 +1381,12 @@ namespace ACE.Server.WorldObjects
             set { if (!value.HasValue) RemoveProperty(PropertyFloat.AllegianceLKeyTimer); else SetProperty(PropertyFloat.AllegianceLKeyTimer, value.Value); }
         }
 
+        public double? BankCommandTimer
+        {
+            get => GetProperty(PropertyFloat.BankCommandTimer);
+            set { if (!value.HasValue) RemoveProperty(PropertyFloat.BankCommandTimer); else SetProperty(PropertyFloat.BankCommandTimer, value.Value); }
+        }
+
         public int? AugLimiter
         {
             get => GetProperty(PropertyInt.AugLimiter);
@@ -1391,6 +1397,602 @@ namespace ACE.Server.WorldObjects
         {
             get => GetProperty(PropertyInt.LastLevel);
             set { if (!value.HasValue) RemoveProperty(PropertyInt.LastLevel); else SetProperty(PropertyInt.LastLevel, value.Value); }
+        }
+        //achievemtns
+        public bool HP1
+        {
+            get => GetProperty(PropertyBool.HP1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HP1); else SetProperty(PropertyBool.HP1, value); }
+        }
+        public bool HP2
+        {
+            get => GetProperty(PropertyBool.HP2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HP2); else SetProperty(PropertyBool.HP2, value); }
+        }
+        public bool HP3
+        {
+            get => GetProperty(PropertyBool.HP3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HP3); else SetProperty(PropertyBool.HP3, value); }
+        }
+        public bool HP4
+        {
+            get => GetProperty(PropertyBool.HP4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HP4); else SetProperty(PropertyBool.HP4, value); }
+        }
+        public bool HP5
+        {
+            get => GetProperty(PropertyBool.HP5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HP5); else SetProperty(PropertyBool.HP5, value); }
+        }
+        public bool HP6
+        {
+            get => GetProperty(PropertyBool.HP6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HP6); else SetProperty(PropertyBool.HP6, value); }
+        }
+        public bool ST1
+        {
+            get => GetProperty(PropertyBool.ST1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ST1); else SetProperty(PropertyBool.ST1, value); }
+        }
+        public bool ST2
+        {
+            get => GetProperty(PropertyBool.ST2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ST2); else SetProperty(PropertyBool.ST2, value); }
+        }
+        public bool ST3
+        {
+            get => GetProperty(PropertyBool.ST3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ST3); else SetProperty(PropertyBool.ST3, value); }
+        }
+        public bool ST4
+        {
+            get => GetProperty(PropertyBool.ST4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ST4); else SetProperty(PropertyBool.ST4, value); }
+        }
+        public bool ST5
+        {
+            get => GetProperty(PropertyBool.ST5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ST5); else SetProperty(PropertyBool.ST5, value); }
+        }
+        public bool ST6
+        {
+            get => GetProperty(PropertyBool.ST6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ST6); else SetProperty(PropertyBool.ST6, value); }
+        }
+        public bool MA1
+        {
+            get => GetProperty(PropertyBool.MA1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MA1); else SetProperty(PropertyBool.MA1, value); }
+        }
+        public bool MA2
+        {
+            get => GetProperty(PropertyBool.MA2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MA2); else SetProperty(PropertyBool.MA2, value); }
+        }
+        public bool MA3
+        {
+            get => GetProperty(PropertyBool.MA3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MA3); else SetProperty(PropertyBool.MA3, value); }
+        }
+        public bool MA4
+        {
+            get => GetProperty(PropertyBool.MA4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MA4); else SetProperty(PropertyBool.MA4, value); }
+        }
+        public bool MA5
+        {
+            get => GetProperty(PropertyBool.MA5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MA5); else SetProperty(PropertyBool.MA5, value); }
+        }
+        public bool MA6
+        {
+            get => GetProperty(PropertyBool.MA6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MA6); else SetProperty(PropertyBool.MA6, value); }
+        }
+
+        public int? AchievementCount
+        {
+            get => GetProperty(PropertyInt.AchievementCount) ?? 0;
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.AchievementCount); else SetProperty(PropertyInt.AchievementCount, value.Value); }
+        }
+
+        public bool ENL1
+        {
+            get => GetProperty(PropertyBool.ENL1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ENL1); else SetProperty(PropertyBool.ENL1, value); }
+        }
+        public bool ENL2
+        {
+            get => GetProperty(PropertyBool.ENL2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ENL2); else SetProperty(PropertyBool.ENL2, value); }
+        }
+        public bool ENL3
+        {
+            get => GetProperty(PropertyBool.ENL3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ENL3); else SetProperty(PropertyBool.ENL3, value); }
+        }
+        public bool ENL4
+        {
+            get => GetProperty(PropertyBool.ENL4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ENL4); else SetProperty(PropertyBool.ENL4, value); }
+        }
+        public bool ENL5
+        {
+            get => GetProperty(PropertyBool.ENL5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ENL5); else SetProperty(PropertyBool.ENL5, value); }
+        }
+        public bool ENL6
+        {
+            get => GetProperty(PropertyBool.ENL6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.ENL6); else SetProperty(PropertyBool.ENL6, value); }
+        }
+
+        public bool AT1
+        {
+            get => GetProperty(PropertyBool.AT1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AT1); else SetProperty(PropertyBool.AT1, value); }
+        }
+        public bool AT2
+        {
+            get => GetProperty(PropertyBool.AT2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AT2); else SetProperty(PropertyBool.AT2, value); }
+        }
+        public bool AT3
+        {
+            get => GetProperty(PropertyBool.AT3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AT3); else SetProperty(PropertyBool.AT3, value); }
+        }
+        public bool AT4
+        {
+            get => GetProperty(PropertyBool.AT4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AT4); else SetProperty(PropertyBool.AT4, value); }
+        }
+        public bool AT5
+        {
+            get => GetProperty(PropertyBool.AT5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AT5); else SetProperty(PropertyBool.AT5, value); }
+        }
+        public bool AT6
+        {
+            get => GetProperty(PropertyBool.AT6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AT6); else SetProperty(PropertyBool.AT6, value); }
+        }
+
+        public bool LV1
+        {
+            get => GetProperty(PropertyBool.LV1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.LV1); else SetProperty(PropertyBool.LV1, value); }
+        }
+        public bool LV2
+        {
+            get => GetProperty(PropertyBool.LV2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.LV2); else SetProperty(PropertyBool.LV2, value); }
+        }
+        public bool LV3
+        {
+            get => GetProperty(PropertyBool.LV3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.LV3); else SetProperty(PropertyBool.LV3, value); }
+        }
+        public bool LV4
+        {
+            get => GetProperty(PropertyBool.LV4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.LV4); else SetProperty(PropertyBool.LV4, value); }
+        }
+        public bool LV5
+        {
+            get => GetProperty(PropertyBool.LV5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.LV5); else SetProperty(PropertyBool.LV5, value); }
+        }
+        public bool LV6
+        {
+            get => GetProperty(PropertyBool.LV6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.LV6); else SetProperty(PropertyBool.LV6, value); }
+        }
+
+        public bool MC1
+        {
+            get => GetProperty(PropertyBool.MC1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MC1); else SetProperty(PropertyBool.MC1, value); }
+        }
+        public bool MC2
+        {
+            get => GetProperty(PropertyBool.MC2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MC2); else SetProperty(PropertyBool.MC2, value); }
+        }
+        public bool MC3
+        {
+            get => GetProperty(PropertyBool.MC3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MC3); else SetProperty(PropertyBool.MC3, value); }
+        }
+        public bool MC4
+        {
+            get => GetProperty(PropertyBool.MC4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MC4); else SetProperty(PropertyBool.MC4, value); }
+        }
+        public bool MC5
+        {
+            get => GetProperty(PropertyBool.MC5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MC5); else SetProperty(PropertyBool.MC5, value); }
+        }
+        public bool MC6
+        {
+            get => GetProperty(PropertyBool.MC6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MC6); else SetProperty(PropertyBool.MC6, value); }
+        }
+
+        public bool HMC1
+        {
+            get => GetProperty(PropertyBool.HMC1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMC1); else SetProperty(PropertyBool.HMC1, value); }
+        }
+        public bool HMC2
+        {
+            get => GetProperty(PropertyBool.HMC2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMC2); else SetProperty(PropertyBool.HMC2, value); }
+        }
+        public bool HMC3
+        {
+            get => GetProperty(PropertyBool.HMC3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMC3); else SetProperty(PropertyBool.HMC3, value); }
+        }
+        public bool HMC4
+        {
+            get => GetProperty(PropertyBool.HMC4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMC4); else SetProperty(PropertyBool.HMC4, value); }
+        }
+        public bool HMC5
+        {
+            get => GetProperty(PropertyBool.HMC5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMC5); else SetProperty(PropertyBool.HMC5, value); }
+        }
+        public bool HMC6
+        {
+            get => GetProperty(PropertyBool.HMC6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMC6); else SetProperty(PropertyBool.HMC6, value); }
+        }
+
+        public bool TS1
+        {
+            get => GetProperty(PropertyBool.TS1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TS1); else SetProperty(PropertyBool.TS1, value); }
+        }
+        public bool TS2
+        {
+            get => GetProperty(PropertyBool.TS2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TS2); else SetProperty(PropertyBool.TS2, value); }
+        }
+        public bool TS3
+        {
+            get => GetProperty(PropertyBool.TS3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TS3); else SetProperty(PropertyBool.TS3, value); }
+        }
+        public bool TS4
+        {
+            get => GetProperty(PropertyBool.TS4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TS4); else SetProperty(PropertyBool.TS4, value); }
+        }
+        public bool TS5
+        {
+            get => GetProperty(PropertyBool.TS5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TS5); else SetProperty(PropertyBool.TS5, value); }
+        }
+        public bool TS6
+        {
+            get => GetProperty(PropertyBool.TS6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TS6); else SetProperty(PropertyBool.TS6, value); }
+        }
+
+        public bool CS1
+        {
+            get => GetProperty(PropertyBool.CS1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CS1); else SetProperty(PropertyBool.CS1, value); }
+        }
+        public bool CS2
+        {
+            get => GetProperty(PropertyBool.CS2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CS2); else SetProperty(PropertyBool.CS2, value); }
+        }
+        public bool CS3
+        {
+            get => GetProperty(PropertyBool.CS3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CS3); else SetProperty(PropertyBool.CS3, value); }
+        }
+        public bool CS4
+        {
+            get => GetProperty(PropertyBool.CS4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CS4); else SetProperty(PropertyBool.CS4, value); }
+        }
+        public bool CS5
+        {
+            get => GetProperty(PropertyBool.CS5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CS5); else SetProperty(PropertyBool.CS5, value); }
+        }
+        public bool CS6
+        {
+            get => GetProperty(PropertyBool.CS6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CS6); else SetProperty(PropertyBool.CS6, value); }
+        }
+
+        public bool CSD1
+        {
+            get => GetProperty(PropertyBool.CSD1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CSD1); else SetProperty(PropertyBool.CSD1, value); }
+        }
+        public bool CSD2
+        {
+            get => GetProperty(PropertyBool.CSD2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CSD2); else SetProperty(PropertyBool.CSD2, value); }
+        }
+        public bool CSD3
+        {
+            get => GetProperty(PropertyBool.CSD3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CSD3); else SetProperty(PropertyBool.CSD3, value); }
+        }
+        public bool CSD4
+        {
+            get => GetProperty(PropertyBool.CSD4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CSD4); else SetProperty(PropertyBool.CSD4, value); }
+        }
+        public bool CSD5
+        {
+            get => GetProperty(PropertyBool.CSD5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CSD5); else SetProperty(PropertyBool.CSD5, value); }
+        }
+        public bool CSD6
+        {
+            get => GetProperty(PropertyBool.CSD6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.CSD6); else SetProperty(PropertyBool.CSD6, value); }
+        }
+
+        public bool SCB1
+        {
+            get => GetProperty(PropertyBool.SCB1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SCB1); else SetProperty(PropertyBool.SCB1, value); }
+        }
+        public bool SCB2
+        {
+            get => GetProperty(PropertyBool.SCB2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SCB2); else SetProperty(PropertyBool.SCB2, value); }
+        }
+        public bool SCB3
+        {
+            get => GetProperty(PropertyBool.SCB3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SCB3); else SetProperty(PropertyBool.SCB3, value); }
+        }
+        public bool SCB4
+        {
+            get => GetProperty(PropertyBool.SCB4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SCB4); else SetProperty(PropertyBool.SCB4, value); }
+        }
+        public bool SCB5
+        {
+            get => GetProperty(PropertyBool.SCB5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SCB5); else SetProperty(PropertyBool.SCB5, value); }
+        }
+        public bool SCB6
+        {
+            get => GetProperty(PropertyBool.SCB6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SCB6); else SetProperty(PropertyBool.SCB6, value); }
+        }
+
+        public bool MAC1
+        {
+            get => GetProperty(PropertyBool.MAC1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MAC1); else SetProperty(PropertyBool.MAC1, value); }
+        }
+        public bool MAC2
+        {
+            get => GetProperty(PropertyBool.MAC2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MAC2); else SetProperty(PropertyBool.MAC2, value); }
+        }
+        public bool MAC3
+        {
+            get => GetProperty(PropertyBool.MAC3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MAC3); else SetProperty(PropertyBool.MAC3, value); }
+        }
+        public bool MAC4
+        {
+            get => GetProperty(PropertyBool.MAC4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MAC4); else SetProperty(PropertyBool.MAC4, value); }
+        }
+        public bool MAC5
+        {
+            get => GetProperty(PropertyBool.MAC5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MAC5); else SetProperty(PropertyBool.MAC5, value); }
+        }
+        public bool MAC6
+        {
+            get => GetProperty(PropertyBool.MAC6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.MAC6); else SetProperty(PropertyBool.MAC6, value); }
+        }
+
+        public bool SD1
+        {
+            get => GetProperty(PropertyBool.SD1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SD1); else SetProperty(PropertyBool.SD1, value); }
+        }
+        public bool SD2
+        {
+            get => GetProperty(PropertyBool.SD2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SD2); else SetProperty(PropertyBool.SD2, value); }
+        }
+        public bool SD3
+        {
+            get => GetProperty(PropertyBool.SD3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SD3); else SetProperty(PropertyBool.SD3, value); }
+        }
+        public bool SD4
+        {
+            get => GetProperty(PropertyBool.SD4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SD4); else SetProperty(PropertyBool.SD4, value); }
+        }
+        public bool SD5
+        {
+            get => GetProperty(PropertyBool.SD5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SD5); else SetProperty(PropertyBool.SD5, value); }
+        }
+        public bool SD6
+        {
+            get => GetProperty(PropertyBool.SD6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SD6); else SetProperty(PropertyBool.SD6, value); }
+        }
+
+        public bool V1
+        {
+            get => GetProperty(PropertyBool.V1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.V1); else SetProperty(PropertyBool.V1, value); }
+        }
+        public bool V2
+        {
+            get => GetProperty(PropertyBool.V2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.V2); else SetProperty(PropertyBool.V2, value); }
+        }
+        public bool V3
+        {
+            get => GetProperty(PropertyBool.V3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.V3); else SetProperty(PropertyBool.V3, value); }
+        }
+        public bool V4
+        {
+            get => GetProperty(PropertyBool.V4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.V4); else SetProperty(PropertyBool.V4, value); }
+        }
+        public bool V5
+        {
+            get => GetProperty(PropertyBool.V5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.V5); else SetProperty(PropertyBool.V5, value); }
+        }
+        public bool V6
+        {
+            get => GetProperty(PropertyBool.V6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.V6); else SetProperty(PropertyBool.V6, value); }
+        }
+
+        public bool AM1
+        {
+            get => GetProperty(PropertyBool.AM1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AM1); else SetProperty(PropertyBool.AM1, value); }
+        }
+        public bool AM2
+        {
+            get => GetProperty(PropertyBool.AM2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AM2); else SetProperty(PropertyBool.AM2, value); }
+        }
+        public bool AM3
+        {
+            get => GetProperty(PropertyBool.AM3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AM3); else SetProperty(PropertyBool.AM3, value); }
+        }
+        public bool AM4
+        {
+            get => GetProperty(PropertyBool.AM4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AM4); else SetProperty(PropertyBool.AM4, value); }
+        }
+        public bool AM5
+        {
+            get => GetProperty(PropertyBool.AM5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AM5); else SetProperty(PropertyBool.AM5, value); }
+        }
+        public bool AM6
+        {
+            get => GetProperty(PropertyBool.AM6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.AM6); else SetProperty(PropertyBool.AM6, value); }
+        }
+
+        public bool TAC1
+        {
+            get => GetProperty(PropertyBool.TAC1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TAC1); else SetProperty(PropertyBool.TAC1, value); }
+        }
+        public bool TAC2
+        {
+            get => GetProperty(PropertyBool.TAC2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TAC2); else SetProperty(PropertyBool.TAC2, value); }
+        }
+        public bool TAC3
+        {
+            get => GetProperty(PropertyBool.TAC3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TAC3); else SetProperty(PropertyBool.TAC3, value); }
+        }
+        public bool TAC4
+        {
+            get => GetProperty(PropertyBool.TAC4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TAC4); else SetProperty(PropertyBool.TAC4, value); }
+        }
+        public bool TAC5
+        {
+            get => GetProperty(PropertyBool.TAC5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TAC5); else SetProperty(PropertyBool.TAC5, value); }
+        }
+        public bool TAC6
+        {
+            get => GetProperty(PropertyBool.TAC6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.TAC6); else SetProperty(PropertyBool.TAC6, value); }
+        }
+
+        public int MonsterKillCount
+        {
+            get => GetProperty(PropertyInt.MonsterKillCount) ?? 0;
+            set { if (value < 0) RemoveProperty(PropertyInt.MonsterKillCount); else SetProperty(PropertyInt.MonsterKillCount, value); }
+        }
+
+        public int? BankAccountNumber
+        {
+            get => GetProperty(PropertyInt.BankAccountNumber);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.BankAccountNumber); else SetProperty(PropertyInt.BankAccountNumber, value.Value); }
+        }
+
+        public int? CriticalStrikeAug
+        {
+            get => GetProperty(PropertyInt.CriticalStrikeAug);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.CriticalStrikeAug); else SetProperty(PropertyInt.CriticalStrikeAug, value.Value); }
+        }
+
+        public int? CriticalStrikeDamageAug
+        {
+            get => GetProperty(PropertyInt.CriticalStrikeDamageAug);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.CriticalStrikeDamageAug); else SetProperty(PropertyInt.CriticalStrikeDamageAug, value.Value); }
+        }
+
+        public int? CompBurnAug
+        {
+            get => GetProperty(PropertyInt.CompBurnAug);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.CompBurnAug); else SetProperty(PropertyInt.CompBurnAug, value.Value); }
+        }
+
+        public int? MissileConsumeAug
+        {
+            get => GetProperty(PropertyInt.MissileConsumeAug);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.MissileConsumeAug); else SetProperty(PropertyInt.MissileConsumeAug, value.Value); }
+        }
+
+        public int? SpellDurationAug
+        {
+            get => GetProperty(PropertyInt.SpellDurationAug);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.SpellDurationAug); else SetProperty(PropertyInt.SpellDurationAug, value.Value); }
+        }
+
+        public int? VitalityAug
+        {
+            get => GetProperty(PropertyInt.VitalityAug) ?? 0;
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.VitalityAug); else SetProperty(PropertyInt.VitalityAug, value.Value); }
+        }
+
+        public int? ArmorManaAug
+        {
+            get => GetProperty(PropertyInt.ArmorManaAug) ?? 0;
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.ArmorManaAug); else SetProperty(PropertyInt.ArmorManaAug, value.Value); }
+        }
+
+        public long? BankedPyreals
+        {
+            get => GetProperty(PropertyInt64.BankedPyreals);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt64.BankedPyreals); else SetProperty(PropertyInt64.BankedPyreals, value.Value); }
+        }
+        public long? BankedLuminance
+        {
+            get => GetProperty(PropertyInt64.BankedLuminance);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt64.BankedLuminance); else SetProperty(PropertyInt64.BankedLuminance, value.Value); }
         }
 
         public double? LastPortalTeleportTimestamp

@@ -264,6 +264,16 @@ namespace ACE.Server.WorldObjects
             if (wielder != null)
                 critRate += wielder.GetCritRating() * 0.01f;
 
+            var oldcrit = critRate;
+
+            if (wielder is Player player)
+            {
+                if (player.CriticalStrikeAug != null)
+                    critRate += (float)player.CriticalStrikeAug * 0.002f;
+
+                /*player.Session.Network.EnqueueSend(new GameMessageSystemChat($"[MAGICAL] old {oldcrit} // new {critRate} ({player.CriticalStrikeAug} * 0.002", ChatMessageType.Broadcast));*/
+            }
+
             // mitigation
             var critResistRatingMod = Creature.GetNegativeRatingMod(target.GetCritResistRating());
             critRate *= critResistRatingMod;
@@ -306,6 +316,16 @@ namespace ACE.Server.WorldObjects
 
             critRate += wielder.GetCritRating() * 0.01f;
 
+            var oldcrit = critRate;
+
+            if (wielder is Player player)
+            {
+                if (player.CriticalStrikeAug != null)
+                    critRate += (float)player.CriticalStrikeAug * 0.002f;
+
+                /*player.Session.Network.EnqueueSend(new GameMessageSystemChat($"[MAGICAL] old {oldcrit} // new {critRate} ({player.CriticalStrikeAug} * 0.002", ChatMessageType.Broadcast));*/
+            }
+
             // mitigation
             var critResistRatingMod = Creature.GetNegativeRatingMod(target.GetCritResistRating());
             critRate *= critResistRatingMod;
@@ -333,8 +353,15 @@ namespace ACE.Server.WorldObjects
 
             // TODO: investigate if CriticalMultiplier / CripplingBlow should be separated more from CD/CDR
             if (wielder != null)
+            {
                 critDamageMod += wielder.GetCritDamageRating() * 0.01f;
 
+                if (wielder is Player player)
+                {
+                    if (player.CriticalStrikeDamageAug != null)
+                        critDamageMod += (float)player.CriticalStrikeDamageAug * 0.005f;
+                }
+            }
             // mitigation
             var critDamageResistRatingMod = Creature.GetNegativeRatingMod(target.GetCritDamageResistRating());
             critDamageMod *= critDamageResistRatingMod;

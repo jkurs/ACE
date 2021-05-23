@@ -27,10 +27,12 @@ namespace ACE.Server.WorldObjects
                     allegianceBonusLXP = 0.05f * (float)monarch.LXPBonus;
             }
 
+            float achievementBonus = 1.0f + 0.03f * (float)AchievementCount; // 3% bonus per achievement point
+
             // should this be passed upstream to fellowship?
             var enchantment = GetXPAndLuminanceModifier(xpType) + allegianceBonusLXP;
 
-            var m_amount = (long)Math.Round(amount * enchantment * modifier);
+            var m_amount = (long)Math.Round(amount * enchantment * achievementBonus * modifier);
 
             GrantLuminance(m_amount, xpType, shareType);
         }

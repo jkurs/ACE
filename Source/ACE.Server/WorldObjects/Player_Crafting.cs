@@ -197,7 +197,7 @@ namespace ACE.Server.WorldObjects
                 // if bags aren't being combined here
                 var valueFactor = (float)added / amountProduced;
                 if (item.ItemType != ItemType.TinkeringMaterial)
-                    valueFactor *= GetCreatureSkill(Skill.Salvaging).Current / 387.0f * (1.0f + 0.25f * AugmentationBonusSalvage);
+                    valueFactor *= GetCreatureSkill(Skill.Salvaging).Current / 387.0f * (1.0f + 0.75f * AugmentationBonusSalvage);
 
                 var addedValue = (int)Math.Round((item.Value ?? 0) * valueFactor);
 

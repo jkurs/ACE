@@ -33,6 +33,462 @@ namespace ACE.Server.Command.Handlers
             CommandHandlerHelper.WriteOutputInfo(session, $"Current world population: {PlayerManager.GetOnlineCount():N0}", ChatMessageType.Broadcast);
         }
 
+        [CommandHandler("bank", AccessLevel.Player, CommandHandlerFlag.None,
+            "Handles all Bank operations.",
+            "")]
+        public static void HandleBank(Session session, params string[] parameters)
+        {
+
+            if (parameters.Length == 0)
+            {
+                session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] To use The Bank of Dereth you must input one of the commands listed below into the chatbox. When you first use any command correctly, you will receive a bank account number.", ChatMessageType.System));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You may access your account number at any time to give to others so that they may send you pyreals or luminance.", ChatMessageType.System));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] How to use The Bank of Dereth!", ChatMessageType.System));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] /bank account - Shows your account number and account balances.", ChatMessageType.x1B));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] /bank send ACCOUNT# pyreals ### - Attempts to send an amount of pyreals to another account number.", ChatMessageType.x1B));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] /bank send ACCOUNT# luminance ### - Attempts to send an amount of luminance to another account number.", ChatMessageType.x1B));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] /bank deposit all - Attempts to deposit all pyreals, MMD's(converts to pyreals), and luminance from your character into your bank.", ChatMessageType.x1B));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] /bank deposit pyreals ### - Attempts to deposit the specified amount of pyreals into your pyreal bank.", ChatMessageType.x1B));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] /bank deposit luminance ### - Attempts to deposit the specified amount of luminance into your luminance bank.", ChatMessageType.x1B));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] /bank withdraw luminance ### - Attempts to withdraw the specified amount of luminance from your bank to your character.", ChatMessageType.x1B));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] /bank withdraw pyreals ### - Attempts to withdraw the specified amount of pyreals from your bank to your inventory. ", ChatMessageType.x1B));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+            }
+            else
+            {
+                if (session.Player.BankAccountNumber == null)
+                {
+                    session.Player.BankedLuminance = 0;
+                    session.Player.BankedPyreals = 0;
+
+                    var bankAccountCreation = new ActionChain();
+                    bankAccountCreation.AddDelaySeconds(2);
+
+                    bankAccountCreation.AddAction(WorldManager.ActionQueue, () =>
+                    {
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Looks like you don't have an account, don't worry here in Dereth we give everyone a free checking account for all your needs!", ChatMessageType.Broadcast));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Creating your personal bank account number...", ChatMessageType.Broadcast));
+                        Player_Bank.GenerateAccountNumber(session.Player);
+                    });
+
+                    bankAccountCreation.EnqueueChain();
+                }
+                else
+                {
+                    if (parameters[0].Equals("account", StringComparison.OrdinalIgnoreCase))
+                    {
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Account Number: {session.Player.BankAccountNumber}", ChatMessageType.x1B));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Account Balances: {session.Player.BankedPyreals:N0} Pyreals || {session.Player.BankedLuminance:N0} Luminance", ChatMessageType.x1B));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                        return;
+                    }
+
+                    if (parameters[0].Equals("send", StringComparison.OrdinalIgnoreCase))
+                    {
+                        bool accountFound = false;
+                        long amountSent = 0;
+                        int.TryParse(parameters[1], out int account);
+                        Int64.TryParse(parameters[3], out long amt);
+
+                        if (parameters.Length < 3)
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] ERROR: Expected more parameters. Please make sure you have all the required fields for the /bank send command.", ChatMessageType.Help));
+                            return;
+                        }
+
+                        if (parameters[2].Equals("pyreals", StringComparison.OrdinalIgnoreCase))
+                        {
+
+                            var players = PlayerManager.GetAllPlayers();
+
+                            foreach (var player in players)
+                            {
+                                if (account == session.Player.BankAccountNumber)
+                                    continue;
+
+                                if (account == player.BankAccountNumber)
+                                {
+                                    if (amt > session.Player.BankedPyreals)
+                                    {
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You do not have enough pyreals in your bank to send {player.Name} that amount.", ChatMessageType.Help));
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        amountSent += amt;
+                                        accountFound = true;
+                                        session.Player.BankedPyreals -= amt;
+                                        player.BankedPyreals += amt;
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You sent {player.Name} {amt:N0} Pyreals.", ChatMessageType.x1B));
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Your New Account Balance: {session.Player.BankedPyreals:N0} Pyreals", ChatMessageType.x1B));
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+
+                                        var isOnline = PlayerManager.GetOnlinePlayer(player.Guid.Full);
+
+                                        if (isOnline != null)
+                                            isOnline.Session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK TRANSACTION] {session.Player.Name} sent you {amountSent:N0} Pyreals", ChatMessageType.x1B));
+
+                                        break;
+                                    }
+                                }
+                                else
+                                    accountFound = false;
+                            }
+
+                            if (!accountFound)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] ERROR: Account number {account} does not exist.", ChatMessageType.Help));
+                                return;
+                            }
+                        }
+                        else if (parameters[2].Equals("luminance", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var players = PlayerManager.GetAllPlayers();
+
+                            foreach (var player in players)
+                            {
+                                if (account == session.Player.BankAccountNumber)
+                                    continue;
+
+                                if (account == player.BankAccountNumber)
+                                {
+                                    if (amt > session.Player.BankedLuminance)
+                                    {
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You do not have enough luminance in your bank to send {player.Name} that amount.", ChatMessageType.Help));
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        amountSent += amt;
+                                        accountFound = true;
+                                        session.Player.BankedLuminance -= amt;
+                                        player.BankedLuminance += amt;
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You sent {player.Name} {amt:N0} Luminance.", ChatMessageType.x1B));
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Your New Account Balance: {session.Player.BankedLuminance:N0} Luminanace", ChatMessageType.x1B));
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+
+                                        var isOnline = PlayerManager.GetOnlinePlayer(player.Guid.Full);
+
+                                        if (isOnline != null)
+                                            isOnline.Session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK TRANSACTION] {session.Player.Name} sent you {amountSent:N0} Luminance", ChatMessageType.x1B));
+
+                                        break;
+                                    }
+                                }
+                                else
+                                    accountFound = false;
+                            }
+
+                            if (!accountFound)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] ERROR: Account Number {account} does not exist.", ChatMessageType.Help));
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] ERROR: Please specify whether you are sending luminance or pyreals.", ChatMessageType.x1B));
+                            return;
+                        }
+                    }
+
+
+                    if (parameters[0].Equals("deposit", StringComparison.OrdinalIgnoreCase))
+                    {
+
+                        if (parameters[1].Equals("all", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (session.Player.BankCommandTimer.HasValue)
+                            {
+                                if (Time.GetUnixTime() >= session.Player.BankCommandTimer)
+                                {
+                                    session.Player.RemoveProperty(PropertyFloat.BankCommandTimer);
+                                }
+                                else
+                                {
+                                    session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You have used this command too recently.", ChatMessageType.Help));
+                                    return;
+                                }
+                            }
+
+                            session.Player.SetProperty(PropertyFloat.BankCommandTimer, Time.GetFutureUnixTime(10));
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Attempting to Deposit your Pyreals and Luminance into your bank...", ChatMessageType.Broadcast));
+
+                            var bankAccountDeposit = new ActionChain();
+                            bankAccountDeposit.AddDelaySeconds(1);
+
+                            bankAccountDeposit.AddAction(WorldManager.ActionQueue, () =>
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Contacting your local Bank of Dereth representative...", ChatMessageType.Broadcast));
+                            });
+                            bankAccountDeposit.AddDelaySeconds(1);
+                            bankAccountDeposit.AddAction(WorldManager.ActionQueue, () =>
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Giving security details...", ChatMessageType.Broadcast));
+                            });
+                            bankAccountDeposit.AddDelaySeconds(1);
+                            bankAccountDeposit.AddAction(WorldManager.ActionQueue, () =>
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Processing done!", ChatMessageType.Broadcast));
+                                Player_Bank.Deposit(session.Player, 0, true);
+                            });
+
+                            bankAccountDeposit.EnqueueChain();
+                            return;
+                        }
+
+                        if (parameters[1].Equals("pyreals", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (session.Player.BankCommandTimer.HasValue)
+                            {
+                                if (Time.GetUnixTime() >= session.Player.BankCommandTimer)
+                                {
+                                    session.Player.RemoveProperty(PropertyFloat.BankCommandTimer);
+                                }
+                                else
+                                {
+                                    session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You have used this command too recently.", ChatMessageType.Help));
+                                    return;
+                                }
+                            }
+
+                            Int64.TryParse(parameters[2], out long amt);
+
+                            if (amt <= 0)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You did not enter a valid amount to deposit.", ChatMessageType.Help));
+                                return;
+                            }
+
+                            var pyreals = session.Player.GetInventoryItemsOfWCID(273);
+                            long availablePyreals = 0;
+
+                            foreach (var item in pyreals)
+                                availablePyreals += (long)item.StackSize;
+
+                            if (amt > availablePyreals)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You do not have enough pyreals in your inventory to deposit that amount.", ChatMessageType.Help));
+                                return;
+                            }
+
+                            session.Player.SetProperty(PropertyFloat.BankCommandTimer, Time.GetFutureUnixTime(10));
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Attempting to Deposit {amt:N0} Pyreals into your bank...", ChatMessageType.Broadcast));
+
+                            var bankAccountDeposit = new ActionChain();
+                            bankAccountDeposit.AddDelaySeconds(1);
+
+                            bankAccountDeposit.AddAction(WorldManager.ActionQueue, () =>
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Contacting your local Bank of Dereth representative...", ChatMessageType.Broadcast));
+                            });
+                            bankAccountDeposit.AddDelaySeconds(1);
+                            bankAccountDeposit.AddAction(WorldManager.ActionQueue, () =>
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Giving security details...", ChatMessageType.Broadcast));
+                            });
+                            bankAccountDeposit.AddDelaySeconds(1);
+                            bankAccountDeposit.AddAction(WorldManager.ActionQueue, () =>
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Processing done!", ChatMessageType.Broadcast));
+                                Player_Bank.Deposit(session.Player, amt, false);
+                            });
+
+                            bankAccountDeposit.EnqueueChain();
+                            return;
+                        }
+
+                        if (parameters[1].Equals("luminance", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (session.Player.BankCommandTimer.HasValue)
+                            {
+                                if (Time.GetUnixTime() >= session.Player.BankCommandTimer)
+                                {
+                                    session.Player.RemoveProperty(PropertyFloat.BankCommandTimer);
+                                }
+                                else
+                                {
+                                    session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You have used this command too recently.", ChatMessageType.Help));
+                                    return;
+                                }
+                            }
+
+                            Int64.TryParse(parameters[2], out long amt);
+
+                            if (amt <= 0)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You did not enter a valid amount to deposit.", ChatMessageType.Help));
+                                return;
+                            }
+
+                            var available = session.Player.AvailableLuminance ?? 0;
+                            var maximum = session.Player.MaximumLuminance ?? 0;
+                            var remaining = maximum - available;
+
+                            if (amt > available)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You do not have enough Luminance to deposit that amount.", ChatMessageType.Help));
+                                return;
+                            }
+
+                            session.Player.SetProperty(PropertyFloat.BankCommandTimer, Time.GetFutureUnixTime(10));
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Attempting to Deposit {amt:N0} Luminance into your bank...", ChatMessageType.Broadcast));
+
+                            var bankAccountDeposit = new ActionChain();
+                            bankAccountDeposit.AddDelaySeconds(1);
+
+                            bankAccountDeposit.AddAction(WorldManager.ActionQueue, () =>
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Contacting your local Bank of Dereth representative...", ChatMessageType.Broadcast));
+                            });
+                            bankAccountDeposit.AddDelaySeconds(1);
+                            bankAccountDeposit.AddAction(WorldManager.ActionQueue, () =>
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Giving security details...", ChatMessageType.Broadcast));
+                            });
+                            bankAccountDeposit.AddDelaySeconds(1);
+                            bankAccountDeposit.AddAction(WorldManager.ActionQueue, () =>
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] Processing done!", ChatMessageType.Broadcast));
+                                Player_Bank.Deposit(session.Player, amt, false, false);
+                            });
+
+                            bankAccountDeposit.EnqueueChain();
+                            return;
+                        }
+                    }
+
+                    if (parameters[0].Equals("withdraw", StringComparison.OrdinalIgnoreCase) && (parameters[1].Equals("luminance", StringComparison.OrdinalIgnoreCase) || parameters[1].Equals("pyreals", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        if (session.Player.BankCommandTimer.HasValue)
+                        {
+                            if (Time.GetUnixTime() >= session.Player.BankCommandTimer)
+                            {
+                                session.Player.RemoveProperty(PropertyFloat.BankCommandTimer);
+                            }
+                            else
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You have used this command too recently.", ChatMessageType.Help));
+                                return;
+                            }
+                        }
+
+                        Int64.TryParse(parameters[2], out long amt);
+
+                        if (amt <= 0)
+                        {
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You did not enter a valid amount to withdraw.", ChatMessageType.Broadcast));
+                            return;
+                        }
+
+                        if (parameters[1].Equals("pyreals", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (amt > session.Player.BankedPyreals)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You do not have enough pyreals to withdraw that amount from your bank. You have {session.Player.BankedPyreals:N0} Pyreals in your bank.", ChatMessageType.Help));
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You requested {amt:N0}.", ChatMessageType.Broadcast));
+                                return;
+                            }
+                            else
+                            {
+                                session.Player.SetProperty(PropertyFloat.BankCommandTimer, Time.GetFutureUnixTime(10));
+                                long amountWithdrawn = 0;
+
+                                for (var i = amt; i >= 25000; i -= 25000)
+                                {
+                                    var pyreals = WorldObjectFactory.CreateNewWorldObject(273);
+                                    pyreals.SetStackSize(25000);
+
+                                    if (session.Player.GetFreeInventorySlots(true) < 10 || !session.Player.HasEnoughBurdenToAddToInventory(pyreals))
+                                    {
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You do not have enough pack space or you are overburdened.", ChatMessageType.Broadcast));
+                                        break;
+                                    }
+
+                                    amt -= 25000;
+
+                                    
+                                    session.Player.TryCreateInInventoryWithNetworking(pyreals);
+
+                                    session.Player.BankedPyreals -= pyreals.StackSize;
+                                    amountWithdrawn += 25000;
+                                }
+
+                                if (amt < 25000 && amt > 0)
+                                {
+                                    var pyreals = WorldObjectFactory.CreateNewWorldObject(273);
+                                    pyreals.SetStackSize((int)amt);
+
+                                    if (session.Player.GetFreeInventorySlots(true) < 10 || !session.Player.HasEnoughBurdenToAddToInventory(pyreals))
+                                    {
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You do not have enough pack space or you are overburdened.", ChatMessageType.Broadcast));
+                                        return;
+                                    }
+                                    
+                                    session.Player.TryCreateInInventoryWithNetworking(pyreals);
+
+                                    session.Player.BankedPyreals -= amt;
+                                    amountWithdrawn += amt;
+                                }                                
+
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You withdrew some pyreals from your bank account. (-{amountWithdrawn:N0})", ChatMessageType.x1B));
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] New Account Balances: {session.Player.BankedPyreals:N0} Pyreals || {session.Player.BankedLuminance:N0} Luminance", ChatMessageType.x1B));
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                            }
+                        }
+
+                        if (parameters[1].Equals("luminance", StringComparison.OrdinalIgnoreCase))
+                        {
+                            
+                            Int64.TryParse(parameters[2], out long amt2);
+
+                            if (amt2 <= 0)
+                                return;
+
+                            if (amt2 > session.Player.BankedLuminance)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You do not have enough Luminance to withdraw that amount from your bank. You have {session.Player.BankedLuminance:N0} Luminance in your bank.", ChatMessageType.Help));
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You requested {amt2:N0}.", ChatMessageType.Broadcast));
+                                return;
+                            }
+
+                            var available = session.Player.AvailableLuminance ?? 0;
+                            var maximum = session.Player.MaximumLuminance ?? 0;
+                            var remaining = maximum - available;
+
+                            if (available == maximum)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You cannot withdraw that much Luminance because you cannot hold that much.", ChatMessageType.Help));
+                                return;
+                            }
+
+                            if (amt2 > remaining)
+                            {
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You cannot withdraw that much Luminance because you cannot hold that much.", ChatMessageType.Help));
+                                return;
+                            }
+                            session.Player.SetProperty(PropertyFloat.BankCommandTimer, Time.GetFutureUnixTime(10));
+                            session.Player.GrantLuminance(amt2, XpType.Admin, ShareType.None);
+                            session.Player.BankedLuminance -= amt2;
+                            session.Player.Session.Network.EnqueueSend(new GameMessagePrivateUpdatePropertyInt64(session.Player, PropertyInt64.AvailableLuminance, session.Player.AvailableLuminance ?? 0));
+
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You withdrew some Luminance from your bank account. (-{amt2:N0})", ChatMessageType.x1B));
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] New Account Balances: {session.Player.BankedPyreals:N0} Pyreals || {session.Player.BankedLuminance:N0} Luminance", ChatMessageType.x1B));
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+                        }
+                    }
+                }
+            }
+        }
+
         [CommandHandler("checkxp", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, 0)]
         public static void HandleCheckXp(Session session, params string[] parameters)
         {
@@ -48,9 +504,575 @@ namespace ACE.Server.Command.Handlers
                 return;         
         }
 
+        [CommandHandler("achev", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, 0)]
+        public static void HandleCheckAchievement(Session session, params string[] parameters)
+        {
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+            session.Network.EnqueueSend(new GameMessageSystemChat($"The list of possible Achievements and their tiers are as follows: *Off White -> Earned, *Red -> Not Earned", ChatMessageType.Broadcast));
+            
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Health Total:", ChatMessageType.System));
+
+            if (session.Player.HP1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 500 Health", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 500 Health", ChatMessageType.Help));
+
+            if (session.Player.HP2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 1,000 Health", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 1,000 Health", ChatMessageType.Help));
+
+            if (session.Player.HP3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 3,000 Health", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 3,000 Health", ChatMessageType.Help));
+
+            if (session.Player.HP4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 6,000 Health", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 6,000 Health", ChatMessageType.Help));
+
+            if (session.Player.HP5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 8,000 Health", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 8,000 Health", ChatMessageType.Help));
+
+            if (session.Player.HP6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 10,000 Health", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 10,000 Health", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Stamina Total:", ChatMessageType.System));
+
+            if (session.Player.ST1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 1,000 Stamina", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 1,000 Stamina", ChatMessageType.Help));
+
+            if (session.Player.ST2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 2,000 Stamina", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 2,000 Stamina", ChatMessageType.Help));
+
+            if (session.Player.ST3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 4,000 Stamina", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 4,000 Stamina", ChatMessageType.Help));
+
+            if (session.Player.ST4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 6,000 Stamina", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 6,000 Stamina", ChatMessageType.Help));
+
+            if (session.Player.ST5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 12,000 Stamina", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 12,000 Stamina", ChatMessageType.Help));
+
+            if (session.Player.ST6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 24,300 Stamina", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 24,300 Stamina", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Mana Total:", ChatMessageType.System));
+
+            if (session.Player.MA1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 1,000 Mana", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 1,000 Mana", ChatMessageType.Help));
+
+            if (session.Player.MA2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 2,000 Mana", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 2,000 Mana", ChatMessageType.Help));
+
+            if (session.Player.MA3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 4,000 Mana", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 4,000 Mana", ChatMessageType.Help));
+
+            if (session.Player.MA4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 6,000 Mana", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 6,000 Mana", ChatMessageType.Help));
+
+            if (session.Player.MA5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 12,000 Mana", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 12,000 Mana", ChatMessageType.Help));
+
+            if (session.Player.MA6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 24,300 Mana", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 24,300 Mana", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Enlightenment Total:", ChatMessageType.System));
+
+            if (session.Player.ENL1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 50 Enlightenments", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 50 Enlightenments", ChatMessageType.Help));
+
+            if (session.Player.ENL2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 100 Enlightenments", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 100 Enlightenments", ChatMessageType.Help));
+
+            if (session.Player.ENL3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 200 Enlightenments", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 200 Enlightenments", ChatMessageType.Help));
+
+            if (session.Player.ENL4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 400 Enlightenments", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 400 Enlightenments", ChatMessageType.Help));
+
+            if (session.Player.ENL5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 600 Enlightenments", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 600 Enlightenments", ChatMessageType.Help));
+
+            if (session.Player.ENL6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 800 Enlightenments", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 800 Enlightenments", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Attribute Combined Total:", ChatMessageType.System));
+
+            if (session.Player.AT1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 1,000 combined total base attributes", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 1,000 combined total base attributes", ChatMessageType.Help));
+
+            if (session.Player.AT2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 4,000 combined total base attributes", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 4,000 combined total base attributes", ChatMessageType.Help));
+
+            if (session.Player.AT3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 7,000 combined total base attributes", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 7,000 combined total base attributes", ChatMessageType.Help));
+
+            if (session.Player.AT4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 12,000 combined total base attributes", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 12,000 combined total base attributes", ChatMessageType.Help));
+
+            if (session.Player.AT5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 15,000 combined total base attributes", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 15,000 combined total base attributes", ChatMessageType.Help));
+
+            if (session.Player.AT6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 20,000 combined total base attributes", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 20,000 combined total base attributes", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Player Level Total:", ChatMessageType.System));
+
+            if (session.Player.LV1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach Level 275", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach Level 275", ChatMessageType.Help));
+
+            if (session.Player.LV2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach Level 1,000", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach Level 1,000", ChatMessageType.Help));
+
+            if (session.Player.LV3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach Level 4,000", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach Level 4,000", ChatMessageType.Help));
+
+            if (session.Player.LV4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach Level 8,000", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach Level 8,000", ChatMessageType.Help));
+
+            if (session.Player.LV5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach Level 10,000", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach Level 10,000", ChatMessageType.Help));
+
+            if (session.Player.LV6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach Level 20,000", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach Level 20,000", ChatMessageType.Help));
+
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Any Level Creature Kills:", ChatMessageType.System));
+
+            if (session.Player.MC1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Kill a total of 1,000 creatures of any level", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Kill a total of 1,000 creatures of any level", ChatMessageType.Help));
+
+            if (session.Player.MC2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Kill a total of 10,000 creatures of any level", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Kill a total of 10,000 creatures of any level", ChatMessageType.Help));
+
+            if (session.Player.MC3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Kill a total of 100,000 creatures of any level", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Kill a total of 100,000 creatures of any level", ChatMessageType.Help));
+
+            if (session.Player.MC4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Kill a total of 1,000,000 creatures of any level", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Kill a total of 1,000,000 creatures of any level", ChatMessageType.Help));
+
+            if (session.Player.MC5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Kill a total of 10,000,000 creatures of any level", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Kill a total of 10,000,000 creatures of any level", ChatMessageType.Help));
+
+            if (session.Player.MC6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Kill a total of 100,000,000 creatures of any level", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Kill a total of 100,000,000 creatures of any level", ChatMessageType.Help));
+
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total 100+ Level Creature Kills:", ChatMessageType.System));
+
+
+            if (session.Player.HMC1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Kill a total of 100 creatures level 100+", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Kill a total of 100 creatures level 100+", ChatMessageType.Help));
+
+            if (session.Player.HMC2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Kill a total of 1,000 creatures level 100+", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Kill a total of 1,000 creatures level 100+", ChatMessageType.Help));
+
+            if (session.Player.HMC3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Kill a total of 10,000 creatures level 100+", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Kill a total of 10,000 creatures level 100+", ChatMessageType.Help));
+
+            if (session.Player.HMC4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Kill a total of 100,000 creatures level 100+", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Kill a total of 100,000 creatures level 100+", ChatMessageType.Help));
+
+            if (session.Player.HMC5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Kill a total of 1,000,000 creatures level 100+", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Kill a total of 1,000,000 creatures level 100+", ChatMessageType.Help));
+
+            if (session.Player.HMC6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Kill a total of 10,000,000 creatures level 100+", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Kill a total of 10,000,000 creatures level 100+", ChatMessageType.Help));
+
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Combined Skill Levels:", ChatMessageType.System));
+
+            if (session.Player.TS1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 5,000 combined total base Skill Levels", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 5,000 combined total base Skill Levels", ChatMessageType.Help));
+
+            if (session.Player.TS2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 10,000 combined total base Skill Levels", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 10,000 combined total base Skill Levels", ChatMessageType.Help));
+
+            if (session.Player.TS3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 25,000 combined total base Skill Levels", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 25,000 combined total base Skill Levels", ChatMessageType.Help));
+
+            if (session.Player.TS4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 35,000 combined total base Skill Levels", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 35,000 combined total base Skill Levels", ChatMessageType.Help));
+
+            if (session.Player.TS5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 40,000 combined total base Skill Levels", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 40,000 combined total base Skill Levels", ChatMessageType.Help));
+
+            if (session.Player.TS6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 60,000 combined total base Skill Levels", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 60,000 combined total base Skill Levels", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Critical Strike Augmentations:", ChatMessageType.System));
+
+            if (session.Player.CS1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Critical Strike Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Critical Strike Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CS2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Critical Strike Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Critical Strike Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CS3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Critical Strike Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Critical Strike Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CS4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Critical Strike Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Critical Strike Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CS5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Critical Strike Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Critical Strike Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CS6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Critical Strike Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Critical Strike Augmentations", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Critical Strike Damage Augmentations:", ChatMessageType.System));
+
+            if (session.Player.CSD1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Critical Strike Damage Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Critical Strike Damage Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CSD2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Critical Strike Damage Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Critical Strike Damage Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CSD3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Critical Strike Damage Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Critical Strike Damage Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CSD4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Critical Strike Damage Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Critical Strike Damage Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CSD5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Critical Strike Damage Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Critical Strike Damage Augmentations", ChatMessageType.Help));
+
+            if (session.Player.CSD6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Critical Strike Damage Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Critical Strike Damage Augmentations", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Spell Component Burn Augmentations:", ChatMessageType.System));
+
+            if (session.Player.SCB1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Spell Component Burn Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Spell Component Burn Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SCB2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Spell Component Burn Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Spell Component Burn Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SCB3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Spell Component Burn Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Spell Component Burn Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SCB4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Spell Component Burn Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Spell Component Burn Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SCB5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Spell Component Burn Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Spell Component Burn Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SCB6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Spell Component Burn Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Spell Component Burn Augmentations", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Missile Ammunition Consume Augmentations:", ChatMessageType.System));
+
+            if (session.Player.MAC1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Missile Ammunition Consume Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Missile Ammunition Consume Augmentations", ChatMessageType.Help));
+
+            if (session.Player.MAC2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Missile Ammunition Consume Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Missile Ammunition Consume Augmentations", ChatMessageType.Help));
+
+            if (session.Player.MAC3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Missile Ammunition Consume Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Missile Ammunition Consume Augmentations", ChatMessageType.Help));
+
+            if (session.Player.MAC4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Missile Ammunition Consume Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Missile Ammunition Consume Augmentations", ChatMessageType.Help));
+
+            if (session.Player.MAC5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Missile Ammunition Consume Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Missile Ammunition Consume Augmentations", ChatMessageType.Help));
+
+            if (session.Player.MAC6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Missile Ammunition Consume Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Missile Ammunition Consume Augmentations", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Spell Duration Augmentations:", ChatMessageType.System));
+
+            if (session.Player.SD1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Spell Duration Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Spell Duration Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SD2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Spell Duration Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Spell Duration Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SD3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Spell Duration Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Spell Duration Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SD4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Spell Duration Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Spell Duration Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SD5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Spell Duration Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Spell Duration Augmentations", ChatMessageType.Help));
+
+            if (session.Player.SD6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Spell Duration Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Spell Duration Augmentations", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Vitality Augmentations:", ChatMessageType.System));
+
+            if (session.Player.V1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Vitality Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Vitality Augmentations", ChatMessageType.Help));
+
+            if (session.Player.V2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Vitality Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Vitality Augmentations", ChatMessageType.Help));
+
+            if (session.Player.V3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Vitality Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Vitality Augmentations", ChatMessageType.Help));
+
+            if (session.Player.V4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Vitality Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Vitality Augmentations", ChatMessageType.Help));
+
+            if (session.Player.V5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Vitality Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Vitality Augmentations", ChatMessageType.Help));
+
+            if (session.Player.V6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Vitality Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Vitality Augmentations", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Armor Mana Augmentations:", ChatMessageType.System));
+
+            if (session.Player.AM1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Armor Mana Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 combined total Armor Mana Augmentations", ChatMessageType.Help));
+
+            if (session.Player.AM2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Armor Mana Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 25 combined total Armor Mana Augmentations", ChatMessageType.Help));
+
+            if (session.Player.AM3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Armor Mana Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 40 combined total Armor Mana Augmentations", ChatMessageType.Help));
+
+            if (session.Player.AM4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Armor Mana Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 55 combined total Armor Mana Augmentations", ChatMessageType.Help));
+
+            if (session.Player.AM5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Armor Mana Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 70 combined total Armor Mana Augmentations", ChatMessageType.Help));
+
+            if (session.Player.AM6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Armor Mana Augmentations", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 100 combined total Armor Mana Augmentations", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Total Achievements Completed:", ChatMessageType.System));
+
+            if (session.Player.TAC1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 17 total Achievements", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 17 total Achievements", ChatMessageType.Help));
+
+            if (session.Player.TAC2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 34 total Achievements", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 34 total Achievements", ChatMessageType.Help));
+
+            if (session.Player.TAC3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 51 total Achievements", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 51 total Achievements", ChatMessageType.Help));
+
+            if (session.Player.TAC4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 68 total Achievements", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 68 total Achievements", ChatMessageType.Help));
+
+            if (session.Player.TAC5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 85 total Achievements", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 85 total Achievements", ChatMessageType.Help));
+
+            if (session.Player.TAC6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 102 total Achievements", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 102 total Achievements", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+
+            var achievementBonusTotal = session.Player.AchievementCount * 3;
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"You have completed {session.Player.AchievementCount} out of 102 achievements", ChatMessageType.Broadcast));
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Your achievements are earning you {achievementBonusTotal}% bonus XP/Lum! (Multiplicative)", ChatMessageType.Broadcast));
+            session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
+
+        }
+
         [CommandHandler("qp", AccessLevel.Player, CommandHandlerFlag.RequiresWorld, "add quest point allocations")]
         public static void HandleQuestPoint(Session session, params string[] parameters)
-        {
+        {           
+
             if (!session.Player.HasAllegiance)
             {
                 session.Network.EnqueueSend(new GameMessageSystemChat($"Only Monarchs may use this command.", ChatMessageType.System));
@@ -60,8 +1082,54 @@ namespace ACE.Server.Command.Handlers
             {
                 if (session.Player.Guid.Full != session.Player.Allegiance.Monarch.PlayerGuid.Full)
                 {
-                    session.Network.EnqueueSend(new GameMessageSystemChat($"Only Monarchs may use this command.", ChatMessageType.System));
-                    return;
+                    if (parameters.Length == 0)
+                        return;
+
+                    if (parameters[0].Equals("show", StringComparison.OrdinalIgnoreCase))
+                    {
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"Current Quest Point Allocations", ChatMessageType.System));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"#-------------------------------------#", ChatMessageType.Broadcast));
+
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"Available QP: {session.Player.Allegiance.Monarch.Player.QuestPoints}.", ChatMessageType.Broadcast));
+
+                        if (session.Player.Allegiance.Monarch.Player.XPBonus.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"%XP has been upgraded {session.Player.Allegiance.Monarch.Player.XPBonus}x Times. Allegiance Members are gaining {session.Player.Allegiance.Monarch.Player.XPBonus * 5}% XP from all sources.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"%XP has been upgraded 0x Times. Allegiance Members are gaining 0% XP from all sources.", ChatMessageType.Allegiance));
+
+                        if (session.Player.Allegiance.Monarch.Player.XPBonusTick.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"TXP has been upgraded {session.Player.Allegiance.Monarch.Player.XPBonusTick}x Times. Allegiance Members are gaining up to {5000000 * session.Player.Allegiance.Monarch.Player.XPBonusTick:N0} XP every 5 seconds.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"TXP has been upgraded 0x Times. Allegiance Members are gaining 0 XP every 5 seconds.", ChatMessageType.Allegiance));
+
+                        if (session.Player.Allegiance.Monarch.Player.LXPBonus.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"%LXP has been upgraded {session.Player.Allegiance.Monarch.Player.LXPBonus}x Times. Allegiance Members are gaining {session.Player.Allegiance.Monarch.Player.LXPBonus * 5}% Luminance XP from all sources.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"%LXP has been upgraded 0x Times. Allegiance Members are gaining 0% Luminace XP from all sources.", ChatMessageType.Allegiance));
+
+                        if (session.Player.Allegiance.Monarch.Player.LXPBonusTick.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"TLXP has been upgraded {session.Player.Allegiance.Monarch.Player.LXPBonusTick}x Times. Allegiance Members are gaining {session.Player.Allegiance.Monarch.Player.LXPBonusTick * 5} Luminance XP every 5 seconds.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"TLXP has been upgraded 0x Times. Allegiance Members are gaining 0 Luminance XP every 5 seconds.", ChatMessageType.Allegiance));
+
+                        if (session.Player.Allegiance.Monarch.Player.AllegianceBonusDamageRating.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"DR has been upgraded {session.Player.Allegiance.Monarch.Player.AllegianceBonusDamageRating}x Times. Allegiance Members are gaining +{session.Player.Allegiance.Monarch.Player.AllegianceBonusDamageRating} Damage Rating", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"DR has been upgraded 0x Times. Allegiance Members are gaining 0 Damage Rating.", ChatMessageType.Allegiance));
+
+                        if (session.Player.Allegiance.Monarch.Player.AllegianceBonusDamageResistRating.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"DRR has been upgraded {session.Player.Allegiance.Monarch.Player.AllegianceBonusDamageResistRating}x Times. Allegiance Members are gaining +{session.Player.Allegiance.Monarch.Player.AllegianceBonusDamageResistRating} Damage Resist Rating.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"DRR has been upgraded 0x Times. Allegiance Members are gaining 0 Damage Resist Rating", ChatMessageType.Allegiance));
+
+                        if (session.Player.Allegiance.Monarch.Player.LKey.HasValue)
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"LKEY has been upgraded {session.Player.Allegiance.Monarch.Player.LKey}x Times. Allegiance Members are allowed to claim {session.Player.Allegiance.Monarch.Player.LKey} 2-use Legendary keys every hour using /Lkey.", ChatMessageType.Allegiance));
+                        else
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"LKEY has been upgraded 0x Times. Allegiance Members cannot claim any Aged Legendary Keys.", ChatMessageType.Allegiance));
+
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"#-------------------------------------#", ChatMessageType.Broadcast));
+                        return;
+                    }
                 }
                 else
                 {
@@ -102,7 +1170,19 @@ namespace ACE.Server.Command.Handlers
                             session.Player.QuestPointsSpent = 0;
 
                         session.Player.QuestPointsSpent += cost;
-                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into %XP. Your allegiance members will now gain {session.Player.XPBonus}% XP from all sources.", ChatMessageType.Broadcast));
+
+                        // iterate through all allegiance members
+                        foreach (var member in session.Player.Allegiance.Members.Keys)
+                        {
+                            // is this allegiance member online?
+                            var online = PlayerManager.GetOnlinePlayer(member);
+                            if (online == null || online.SquelchManager.Squelches.Contains(session.Player, ChatMessageType.Allegiance))
+                                continue;
+
+                            online.Session.Network.EnqueueSend(new GameEventChannelBroadcast(online.Session, Channel.AllegianceBroadcast, session.Player.Name, $"Has added quest points into %XP. All allegiance members will now gain {session.Player.XPBonus * 5}% XP from all sources."));
+                        }
+
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into %XP. Your allegiance members will now gain {session.Player.XPBonus * 5}% XP from all sources.", ChatMessageType.Broadcast));
                         return;
                     }
 
@@ -127,7 +1207,19 @@ namespace ACE.Server.Command.Handlers
                             session.Player.QuestPointsSpent = 0;
 
                         session.Player.QuestPointsSpent += cost;
-                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into %LXP. Your allegiance members will now gain {session.Player.LXPBonus}% Luminance XP from all sources.", ChatMessageType.Broadcast));
+
+                        // iterate through all allegiance members
+                        foreach (var member in session.Player.Allegiance.Members.Keys)
+                        {
+                            // is this allegiance member online?
+                            var online = PlayerManager.GetOnlinePlayer(member);
+                            if (online == null || online.SquelchManager.Squelches.Contains(session.Player, ChatMessageType.Allegiance))
+                                continue;
+
+                            online.Session.Network.EnqueueSend(new GameEventChannelBroadcast(online.Session, Channel.AllegianceBroadcast, session.Player.Name, $"Has added quest points into %LXP. All allegiance members will now gain {session.Player.LXPBonus * 5}% Luminance XP from all sources."));
+                        }
+
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into %LXP. Your allegiance members will now gain {session.Player.LXPBonus * 5}% Luminance XP from all sources.", ChatMessageType.Broadcast));
                         return;
                     }
 
@@ -135,8 +1227,6 @@ namespace ACE.Server.Command.Handlers
                     {
                         // 1000 quest points per point.
                         var cost = 250 + ((session.Player.XPBonusTick ?? 0) * 50);
-
-                        var tickamount = 10000;
 
                         if (session.Player.QuestPoints < cost)
                         {
@@ -154,7 +1244,19 @@ namespace ACE.Server.Command.Handlers
                             session.Player.QuestPointsSpent = 0;
 
                         session.Player.QuestPointsSpent += cost;
-                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into TXP. Your allegiance members will now gain {tickamount * session.Player.XPBonusTick:N0} XP every 5 seconds.", ChatMessageType.Broadcast));
+
+                        // iterate through all allegiance members
+                        foreach (var member in session.Player.Allegiance.Members.Keys)
+                        {
+                            // is this allegiance member online?
+                            var online = PlayerManager.GetOnlinePlayer(member);
+                            if (online == null || online.SquelchManager.Squelches.Contains(session.Player, ChatMessageType.Allegiance))
+                                continue;
+
+                            online.Session.Network.EnqueueSend(new GameEventChannelBroadcast(online.Session, Channel.AllegianceBroadcast, session.Player.Name, $"Has added quest points into TXP. All allegiance members will now gain up to {5000000 * session.Player.XPBonusTick:N0} XP every 5 seconds. ({3750 * session.Player.XPBonusTick:N0}xp per level until 275)"));
+                        }
+
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into TXP. Your allegiance members will now gain up to 5,000,000 XP every 5 seconds. (750xp per level until 275)", ChatMessageType.Broadcast));
                         return;
                     }
 
@@ -179,6 +1281,18 @@ namespace ACE.Server.Command.Handlers
                             session.Player.QuestPointsSpent = 0;
 
                         session.Player.QuestPointsSpent += cost;
+
+                        // iterate through all allegiance members
+                        foreach (var member in session.Player.Allegiance.Members.Keys)
+                        {
+                            // is this allegiance member online?
+                            var online = PlayerManager.GetOnlinePlayer(member);
+                            if (online == null || online.SquelchManager.Squelches.Contains(session.Player, ChatMessageType.Allegiance))
+                                continue;
+
+                            online.Session.Network.EnqueueSend(new GameEventChannelBroadcast(online.Session, Channel.AllegianceBroadcast, session.Player.Name, $"Has added quest points into Damage Rating. All allegiance members will now gain +{session.Player.AllegianceBonusDamageRating:N0} Damage Rating."));
+                        }
+
                         session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into Damage Rating. Your allegiance members will now gain +{session.Player.AllegianceBonusDamageRating:N0} Damage Rating.", ChatMessageType.Broadcast));
                         return;
                     }
@@ -204,6 +1318,18 @@ namespace ACE.Server.Command.Handlers
                             session.Player.QuestPointsSpent = 0;
 
                         session.Player.QuestPointsSpent += cost;
+
+                        // iterate through all allegiance members
+                        foreach (var member in session.Player.Allegiance.Members.Keys)
+                        {
+                            // is this allegiance member online?
+                            var online = PlayerManager.GetOnlinePlayer(member);
+                            if (online == null || online.SquelchManager.Squelches.Contains(session.Player, ChatMessageType.Allegiance))
+                                continue;
+
+                            online.Session.Network.EnqueueSend(new GameEventChannelBroadcast(online.Session, Channel.AllegianceBroadcast, session.Player.Name, $"Has added quest points into Damage Resist Rating. All allegiance members will now gain +{session.Player.AllegianceBonusDamageResistRating:N0} Damage Resist Rating."));
+                        }
+
                         session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into Damage Resist Rating. Your allegiance members will now gain +{session.Player.AllegianceBonusDamageResistRating:N0} Damage Resist Rating.", ChatMessageType.Broadcast));
                         return;
                     }
@@ -231,6 +1357,18 @@ namespace ACE.Server.Command.Handlers
                             session.Player.QuestPointsSpent = 0;
 
                         session.Player.QuestPointsSpent += cost;
+
+                        // iterate through all allegiance members
+                        foreach (var member in session.Player.Allegiance.Members.Keys)
+                        {
+                            // is this allegiance member online?
+                            var online = PlayerManager.GetOnlinePlayer(member);
+                            if (online == null || online.SquelchManager.Squelches.Contains(session.Player, ChatMessageType.Allegiance))
+                                continue;
+
+                            online.Session.Network.EnqueueSend(new GameEventChannelBroadcast(online.Session, Channel.AllegianceBroadcast, session.Player.Name, $"Has added quest points into TLXP. All allegiance members will now gain {tickamount * session.Player.LXPBonusTick:N0} Luminance XP every 5 seconds"));
+                        }
+
                         session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into TLXP. Your allegiance members will now gain {tickamount * session.Player.LXPBonusTick:N0} Luminance XP every 5 seconds", ChatMessageType.Broadcast));
                         return;
                     }
@@ -256,6 +1394,18 @@ namespace ACE.Server.Command.Handlers
                             session.Player.QuestPointsSpent = 0;
 
                         session.Player.QuestPointsSpent += cost;
+
+                        // iterate through all allegiance members
+                        foreach (var member in session.Player.Allegiance.Members.Keys)
+                        {
+                            // is this allegiance member online?
+                            var online = PlayerManager.GetOnlinePlayer(member);
+                            if (online == null || online.SquelchManager.Squelches.Contains(session.Player, ChatMessageType.Allegiance))
+                                continue;
+
+                            online.Session.Network.EnqueueSend(new GameEventChannelBroadcast(online.Session, Channel.AllegianceBroadcast, session.Player.Name, $"Has added quest points into LKEY. All allegiance members can claim legendary keys using the command /Lkey {session.Player.LKey} times an hour"));
+                        }
+
                         session.Network.EnqueueSend(new GameMessageSystemChat($"You have added quest points into LKEY. Your allegiance members can claim legendary keys using the command /Lkey {session.Player.LKey} times an hour", ChatMessageType.Broadcast));
                         return;
                     }
@@ -298,7 +1448,7 @@ namespace ACE.Server.Command.Handlers
                             session.Network.EnqueueSend(new GameMessageSystemChat($"DRR has been upgraded 0x Times. Allegiance Members are gaining 0 Damage Resist Rating", ChatMessageType.Allegiance));
 
                         if (session.Player.LKey.HasValue)
-                            session.Network.EnqueueSend(new GameMessageSystemChat($"LKEY has been upgraded {session.Player.LKey}x Times. Allegiance Members are allowed to claim {session.Player.LKey} Aged Legendary keys every hour using /Lkey.", ChatMessageType.Allegiance));
+                            session.Network.EnqueueSend(new GameMessageSystemChat($"LKEY has been upgraded {session.Player.LKey}x Times. Allegiance Members are allowed to claim {session.Player.LKey} 2-use Legendary keys every hour using /Lkey.", ChatMessageType.Allegiance));
                         else
                             session.Network.EnqueueSend(new GameMessageSystemChat($"LKEY has been upgraded 0x Times. Allegiance Members cannot claim any Aged Legendary Keys.", ChatMessageType.Allegiance));
 
@@ -322,6 +1472,74 @@ namespace ACE.Server.Command.Handlers
             "")]
         public static void HandleLKey(Session session, params string[] parameters)
         {
+            var characters = Player.GetAccountPlayers(session.Player.Account.AccountId);
+
+            bool lkeyclaimed = false;
+            bool keysclaim = false;
+            int counttotal = 0;
+            foreach (var character in characters)
+            {
+                if (character.LKeyClaims.HasValue)
+                    counttotal++;
+
+                if (character.Name != session.Player.Name)
+                {
+                    if (character.LKeyClaims.HasValue)
+                        keysclaim = true;
+
+                    if (character.AllegianceLKeyTimer.HasValue)
+                    {
+                        if (character.AllegianceLKeyTimer > 0)
+                            lkeyclaimed = true;
+
+                        if (Time.GetUnixTime() >= character.AllegianceLKeyTimer)
+                        {
+                                character.RemoveProperty(PropertyFloat.AllegianceLKeyTimer);
+                                character.RemoveProperty(PropertyInt.LKeyClaims);
+                                session.Network.EnqueueSend(new GameMessageSystemChat($"A character on your account Lkey timer has expired.", ChatMessageType.System));
+                        }
+                    }
+                }
+            }
+
+            if (session.Player.AllegianceLKeyTimer.HasValue)
+            {
+                var remaining = Math.Abs((double)Time.GetUnixTime() - (double)session.Player.AllegianceLKeyTimer);
+
+                var minutes = remaining / 60;
+                var hours = minutes / 60;    
+
+                var twodec = string.Format("{0:0.00}", minutes);      // "123.46"
+                session.Network.EnqueueSend(new GameMessageSystemChat($"You cannot claim more keys for another {twodec} Minutes", ChatMessageType.System));
+            }
+
+            // if the count of characters that has lkey is greater than 1 reset all characters.
+            if (counttotal > 1)
+            {
+                foreach (var character in characters)
+                {
+                    character.RemoveProperty(PropertyFloat.AllegianceLKeyTimer);
+                    character.RemoveProperty(PropertyInt.LKeyClaims);
+                }
+
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[INFORMATION] Your account may have been in a bugged state. Because of this you may claim your keys again, however please note that from here on out, once you start the claim process" +
+                    $" you will not be able to claim the remainder on another character. You must finish claiming them on one single character and once the timer expires on that character you may use it on another if you wish. " +
+                    $" Please reissue /lkey to start claiming your keys on this character!", ChatMessageType.System));
+                return;
+            }            
+
+            if (lkeyclaimed)
+            {
+                session.Network.EnqueueSend(new GameMessageSystemChat($"You have a character who has already claimed legendary key(s) on your account.", ChatMessageType.System));
+                return;
+            }
+
+            if (keysclaim)
+            {
+                session.Network.EnqueueSend(new GameMessageSystemChat($"You must claim your keys all on one character.", ChatMessageType.System));
+                return;
+            }
+
             if (!session.Player.HasAllegiance)
             {
                 session.Network.EnqueueSend(new GameMessageSystemChat($"You are not in an allegiance.", ChatMessageType.System));
@@ -340,15 +1558,16 @@ namespace ACE.Server.Command.Handlers
 
                     if (session.Player.LKeyClaims < claims)
                     {
-                        var agedKey = WorldObjectFactory.CreateNewWorldObject(48746);
+                        var legkey = WorldObjectFactory.CreateNewWorldObject(5000004);
 
-                        if (!session.Player.TryCreateInInventoryWithNetworking(agedKey))
+                        if (!session.Player.TryCreateInInventoryWithNetworking(legkey))
                         {
                             session.Network.EnqueueSend(new GameMessageSystemChat($"Failed to create your legendary key, please make space or make sure you have enough burden!", ChatMessageType.System));
                             return;
                         }
 
-                        session.Player.TryCreateInInventoryWithNetworking(agedKey);
+                        session.Player.TryCreateInInventoryWithNetworking(legkey);
+
                         session.Player.LKeyClaims++;
 
                         if (session.Player.LKeyClaims >= claims)
@@ -393,10 +1612,10 @@ namespace ACE.Server.Command.Handlers
                 if (amt > 1)
                 {
                     for (var i = 0; i < amt; i++)
-                    {
-                        strCostEthereal++;
+                    {                        
                         strcost = (ulong)Math.Round(10UL * (ulong)strCostEthereal / (2.995D - (0.001D * strCostEthereal)) * 329220194D);
                         multiamount += (ulong)strcost;
+                        strCostEthereal++;
                     }
                 }
                 else
@@ -453,10 +1672,10 @@ namespace ACE.Server.Command.Handlers
                 if (amt > 1)
                 {
                     for (var i = 0; i < amt; i++)
-                    {
-                        endCostEthereal++;
+                    {                        
                         endcost = (ulong)Math.Round(10UL * (ulong)endCostEthereal / (2.995D - (0.001D * endCostEthereal)) * 329220194D);
                         multiamount += (ulong)endcost;
+                        endCostEthereal++;
                     }
                 }
                 else
@@ -513,10 +1732,10 @@ namespace ACE.Server.Command.Handlers
                 if (amt > 1)
                 {
                     for (var i = 0; i < amt; i++)
-                    {
-                        coordCostEthereal++;
+                    {                        
                         coordcost = (ulong)Math.Round(10UL * (ulong)coordCostEthereal / (2.995D - (0.001D * coordCostEthereal)) * 329220194D);
                         multiamount += (ulong)coordcost;
+                        coordCostEthereal++;
                     }
                 }
                 else
@@ -573,10 +1792,10 @@ namespace ACE.Server.Command.Handlers
                 if (amt > 1)
                 {
                     for (var i = 0; i < amt; i++)
-                    {
-                        quickCostEthereal++;
+                    {                        
                         quickcost = (ulong)Math.Round(10UL * (ulong)quickCostEthereal / (2.995D - (0.001D * quickCostEthereal)) * 329220194D);
                         multiamount += (ulong)quickcost;
+                        quickCostEthereal++;
                     }
                 }
                 else
@@ -633,10 +1852,10 @@ namespace ACE.Server.Command.Handlers
                 if (amt > 1)
                 {
                     for (var i = 0; i < amt; i++)
-                    {
-                        focusCostEthereal++;
+                    {                        
                         focuscost = (ulong)Math.Round(10UL * (ulong)focusCostEthereal / (2.995D - (0.001D * focusCostEthereal)) * 329220194D);
                         multiamount += (ulong)focuscost;
+                        focusCostEthereal++;
                     }
                 }
                 else
@@ -694,10 +1913,10 @@ namespace ACE.Server.Command.Handlers
                 if (amt > 1)
                 {
                     for (var i = 0; i < amt; i++)
-                    {
-                        selfCostEthereal++;
+                    {                        
                         selfcost = (ulong)Math.Round(10UL * (ulong)selfCostEthereal / (2.995D - (0.001D * selfCostEthereal)) * 329220194D);
                         multiamount += (ulong)selfcost;
+                        selfCostEthereal++;
                     }
                 }
                 else
@@ -764,25 +1983,25 @@ namespace ACE.Server.Command.Handlers
             var Inventory = session.Player.Inventory;
             if  (!Inventory.ContainsKey(obj.Guid))
             {
-                session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] You do not own that item or it is an invalid object.", ChatMessageType.System));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[Failed] You do not own that item or it is an invalid object.", ChatMessageType.System));
                 return;
             }
 
             if (!obj.ArmorMana.HasValue)
             {
-                session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] Item does not have Armor Mana.", ChatMessageType.System));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[Failed] Item does not have Armor Mana.", ChatMessageType.System));
                 return;
             }
 
             if (session.Player.GetInventoryItemsOfWCID(5000000).Count <= 0)
             {
-                session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] You do not have an Armor Mana Repair Kit in your inventory.", ChatMessageType.System));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[Failed] You do not have an Armor Mana Repair Kit in your inventory.", ChatMessageType.System));
                 return;
             }
 
             if (obj.ArmorMana >= 50)
             {
-                session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] Armor is not under 50% Armor Mana.", ChatMessageType.System));
+                session.Network.EnqueueSend(new GameMessageSystemChat($"[Failed] Armor is not under 50% Armor Mana.", ChatMessageType.System));
                 return;
             }            
 
@@ -793,7 +2012,7 @@ namespace ACE.Server.Command.Handlers
                 {
                     if (!session.Player.TryConsumeFromInventoryWithNetworking(5000000, 10))
                     {
-                        session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Failed] You could not repair {obj.NameWithMaterial} because you didn't have 10 Armor Repair Kits available.", ChatMessageType.System));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"[Failed] You could not repair {obj.NameWithMaterial} because you didn't have 10 Armor Repair Kits available.", ChatMessageType.System));
                         return;
                     }
                     else
@@ -801,7 +2020,7 @@ namespace ACE.Server.Command.Handlers
                         session.Player.TryConsumeFromInventoryWithNetworking(5000000, 10);
                         obj.ArmorMana = 100;
                         obj.LongDesc = $"Armor Mana: {obj.ArmorMana}/100";
-                        session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Success] Your {obj.NameWithMaterial} has been repaired, consuming 10 Armor Mana Repair Kits", ChatMessageType.System));
+                        session.Network.EnqueueSend(new GameMessageSystemChat($"[Success] Your {obj.NameWithMaterial} has been repaired, consuming 10 Armor Mana Repair Kits", ChatMessageType.System));
                         return;
                     }
                 }
@@ -810,7 +2029,7 @@ namespace ACE.Server.Command.Handlers
                     obj.ArmorMana = 100;
                     obj.LongDesc = $"Armor Mana: {obj.ArmorMana}/100";
                     session.Player.TryConsumeFromInventoryWithNetworking(5000000, 1);
-                    session.Player.EnqueueBroadcast(new GameMessageSystemChat($"[Success] Your {obj.NameWithMaterial} has been repaired.", ChatMessageType.System));
+                    session.Network.EnqueueSend(new GameMessageSystemChat($"[Success] Your {obj.NameWithMaterial} has been repaired.", ChatMessageType.System));
                 }
             }
         }
