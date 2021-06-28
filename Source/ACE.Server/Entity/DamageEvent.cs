@@ -85,6 +85,9 @@ namespace ACE.Server.Entity
         public float CriticalChance;
         public float CriticalDamageMod;
 
+        public float CriticalDamageRatingMod;
+        public float CriticalDamageResistanceRatingMod;
+
         public float DamageBeforeMitigation;
 
         public float ArmorMod;
@@ -92,6 +95,7 @@ namespace ACE.Server.Entity
         public float ShieldMod;
         public float WeaponResistanceMod;
 
+        public float DamageResistanceRatingBaseMod;
         public float DamageResistanceRatingMod;
 
         public float DamageMitigated;
@@ -261,7 +265,7 @@ namespace ACE.Server.Entity
             // get damage modifiers
             PowerMod = attacker.GetPowerMod(Weapon);
             AttributeMod = attacker.GetAttributeMod(Weapon);
-            SlayerMod = WorldObject.GetWeaponCreatureSlayerModifier(attacker, defender);
+            SlayerMod = WorldObject.GetWeaponCreatureSlayerModifier(Weapon, attacker, defender);
 
             // ratings
             DamageRatingBaseMod = Creature.GetPositiveRatingMod(attacker.GetDamageRating());
@@ -276,7 +280,7 @@ namespace ACE.Server.Entity
 
             // critical hit?
             var attackSkill = attacker.GetCreatureSkill(attacker.GetCurrentWeaponSkill());
-            CriticalChance = WorldObject.GetWeaponCriticalChance(attacker, attackSkill, defender);
+            CriticalChance = WorldObject.GetWeaponCriticalChance(Weapon, attacker, attackSkill, defender);
 
             // https://asheron.fandom.com/wiki/Announcements_-_2002/08_-_Atonement
             // It should be noted that any time a character is logging off, PK or not, all physical attacks against them become automatically critical.
@@ -300,13 +304,16 @@ namespace ACE.Server.Entity
                 {
                     IsCritical = true;
 
-                    CriticalDamageMod = 1.0f + WorldObject.GetWeaponCritDamageMod(attacker, attackSkill, defender);
+                    // verify: CriticalMultiplier only applied to the additional crit damage,
+                    // whereas CD/CDR applied to the total damage (base damage + additional crit damage)
+                    CriticalDamageMod = 1.0f + WorldObject.GetWeaponCritDamageMod(Weapon, attacker, attackSkill, defender);
+
+                    CriticalDamageRatingMod = Creature.GetPositiveRatingMod(attacker.GetCritDamageRating());
 
                     // recklessness excluded from crits
                     RecklessnessMod = 1.0f;
-                    DamageRatingMod = Creature.AdditiveCombine(DamageRatingBaseMod, SneakAttackMod, HeritageMod);
+                    DamageRatingMod = Creature.AdditiveCombine(DamageRatingBaseMod, CriticalDamageRatingMod, SneakAttackMod, HeritageMod);
 
-                    // should DR and CDR be combined additively instead of multiplicatively?
                     DamageBeforeMitigation = BaseDamageMod.MaxDamage * AttributeMod * PowerMod * SlayerMod * DamageRatingMod * CriticalDamageMod;
                 }
             }
@@ -352,7 +359,7 @@ namespace ACE.Server.Entity
                 ArmorMod = 1.0f;
 
             // get resistance modifiers
-            WeaponResistanceMod = WorldObject.GetWeaponResistanceModifier(attacker, attackSkill, DamageType);
+            WeaponResistanceMod = WorldObject.GetWeaponResistanceModifier(Weapon, attacker, attackSkill, DamageType);
 
             float dmgmod = 1.0f;
 
@@ -371,11 +378,17 @@ namespace ACE.Server.Entity
             }
 
             // damage resistance rating
-            DamageResistanceRatingMod = defender.GetDamageResistRatingMod(CombatType);
+            DamageResistanceRatingMod = DamageResistanceRatingBaseMod = defender.GetDamageResistRatingMod(CombatType);
+
+            if (IsCritical)
+            {
+                CriticalDamageResistanceRatingMod = Creature.GetNegativeRatingMod(defender.GetCritDamageResistRating());
+
+                DamageResistanceRatingMod = Creature.AdditiveCombine(DamageResistanceRatingBaseMod, CriticalDamageResistanceRatingMod);
+            }
 
             // get shield modifier
             ShieldMod = defender.GetShieldMod(attacker, DamageType, Weapon);
-
 
             if (Weapon != null && attacker == playerAttacker && !(attacker is CombatPet))
             {
@@ -520,7 +533,7 @@ namespace ACE.Server.Entity
                 BaseDamageMod.DamageBonus += Weapon.Damage ?? 0;
 
             if (DamageSource.ItemType == ItemType.MissileWeapon)
-                BaseDamageMod.ElementalBonus = WorldObject.GetMissileElementalDamageBonus(attacker, DamageType);
+                BaseDamageMod.ElementalBonus = WorldObject.GetMissileElementalDamageBonus(Weapon, attacker, DamageType);
 
             BaseDamage = (float)ThreadSafeRandom.Next(BaseDamageMod.MinDamage, BaseDamageMod.MaxDamage);
         }
@@ -615,10 +628,13 @@ namespace ACE.Server.Entity
             info += $"AttackHeight: {AttackHeight}\n";
 
             // lifestone protection
-            info += $"LifestoneProtection: {LifestoneProtection}\n";
+            if (LifestoneProtection)
+                info += $"LifestoneProtection: {LifestoneProtection}\n";
 
             // evade
-            info += $"AccuracyMod: {AccuracyMod}\n";
+            if (AccuracyMod != 0.0f && AccuracyMod != 1.0f)
+                info += $"AccuracyMod: {AccuracyMod}\n";
+
             info += $"EffectiveAttackSkill: {EffectiveAttackSkill}\n";
             info += $"EffectiveDefenseSkill: {EffectiveDefenseSkill}\n";
 
@@ -645,30 +661,53 @@ namespace ACE.Server.Entity
 
             // damage modifiers
             info += $"AttributeMod: {AttributeMod}\n";
-            info += $"PowerMod: {PowerMod}\n";
-            info += $"SlayerMod: {SlayerMod}\n";
+
+            if (PowerMod != 0.0f && PowerMod != 1.0f)
+                info += $"PowerMod: {PowerMod}\n";
+
+            if (SlayerMod != 0.0f && SlayerMod != 1.0f)
+                info += $"SlayerMod: {SlayerMod}\n";
 
             if (BaseDamageMod != null)
             {
-                info += $"ElementalDamageBonus: {BaseDamageMod.ElementalBonus}\n";
-                info += $"MissileWeaponModifier: {BaseDamageMod.DamageMod}\n";
-                info += $"BloodDrinker/ThirstTotal: {BaseDamageMod.DamageBonus}\n";
+                if (BaseDamageMod.DamageBonus != 0)
+                    info += $"DamageBonus: {BaseDamageMod.DamageBonus}\n";
+
+                if (BaseDamageMod.DamageMod != 0.0f && BaseDamageMod.DamageMod != 1.0f)
+                    info += $"DamageMod: {BaseDamageMod.DamageMod}\n";
+
+                if (BaseDamageMod.ElementalBonus != 0)
+                    info += $"ElementalDamageBonus: {BaseDamageMod.ElementalBonus}\n";
             }
-
-            // damage ratings
-            if (!(Defender is Player))
-                info += $"DamageRatingBaseMod: {DamageRatingBaseMod}\n";
-
-            info += $"HeritageMod: {HeritageMod}\n";
-            info += $"RecklessnessMod: {RecklessnessMod}\n";
-            info += $"SneakAttackMod: {SneakAttackMod}\n";
-            info += $"DamageRatingMod: {DamageRatingMod}\n";
 
             // critical hit
             info += $"CriticalChance: {CriticalChance}\n";
             info += $"CriticalHit: {IsCritical}\n";
-            info += $"CriticalDefended: {CriticalDefended}\n";
-            info += $"CriticalDamageMod: {CriticalDamageMod}\n";
+
+            if (CriticalDefended)
+                info += $"CriticalDefended: {CriticalDefended}\n";
+
+            if (CriticalDamageMod != 0.0f && CriticalDamageMod != 1.0f)
+                info += $"CriticalDamageMod: {CriticalDamageMod}\n";
+
+            if (CriticalDamageRatingMod != 0.0f && CriticalDamageRatingMod != 1.0f)
+                info += $"CriticalDamageRatingMod: {CriticalDamageRatingMod}\n";
+
+            // damage ratings
+            if (DamageRatingBaseMod != 0.0f && DamageRatingBaseMod != 1.0f)
+                info += $"DamageRatingBaseMod: {DamageRatingBaseMod}\n";
+
+            if (HeritageMod != 0.0f && HeritageMod != 1.0f)
+                info += $"HeritageMod: {HeritageMod}\n";
+
+            if (RecklessnessMod != 0.0f && RecklessnessMod != 1.0f)
+                info += $"RecklessnessMod: {RecklessnessMod}\n";
+
+            if (SneakAttackMod != 0.0f && SneakAttackMod != 1.0f)
+                info += $"SneakAttackMod: {SneakAttackMod}\n";
+
+            if (DamageRatingMod != 0.0f && DamageRatingMod != 1.0f)
+                info += $"DamageRatingMod: {DamageRatingMod}\n";
 
             if (BodyPart != 0)
             {
@@ -688,12 +727,26 @@ namespace ACE.Server.Entity
             }
 
             // damage mitigation
-            info += $"ArmorMod: {ArmorMod}\n";
-            info += $"ResistanceMod: {ResistanceMod}\n";
-            info += $"ShieldMod: {ShieldMod}\n";
-            info += $"WeaponResistanceMod: {WeaponResistanceMod}\n";
+            if (ArmorMod != 0.0f && ArmorMod != 1.0f)
+                info += $"ArmorMod: {ArmorMod}\n";
 
-            info += $"DamageResistanceRatingMod: {DamageResistanceRatingMod}\n";
+            if (ResistanceMod != 0.0f && ResistanceMod != 1.0f)
+                info += $"ResistanceMod: {ResistanceMod}\n";
+
+            if (ShieldMod != 0.0f && ShieldMod != 1.0f)
+                info += $"ShieldMod: {ShieldMod}\n";
+
+            if (WeaponResistanceMod != 0.0f && WeaponResistanceMod != 1.0f)
+                info += $"WeaponResistanceMod: {WeaponResistanceMod}\n";
+
+            if (DamageResistanceRatingBaseMod != 0.0f && DamageResistanceRatingBaseMod != 1.0f)
+                info += $"DamageResistanceRatingBaseMod: {DamageResistanceRatingBaseMod}\n";
+
+            if (CriticalDamageResistanceRatingMod != 0.0f && CriticalDamageResistanceRatingMod != 1.0f)
+                info += $"CriticalDamageResistanceRatingMod: {CriticalDamageResistanceRatingMod}\n";
+
+            if (DamageResistanceRatingMod != 0.0f && DamageResistanceRatingMod != 1.0f)
+                info += $"DamageResistanceRatingMod: {DamageResistanceRatingBaseMod}\n";
 
             if (IgnoreMagicArmor)
                 info += $"IgnoreMagicArmor: {IgnoreMagicArmor}\n";
