@@ -122,16 +122,22 @@ namespace ACE.Server.WorldObjects
                     if (totalXp > 5000000)
                         totalXp = 5000000;
 
-                    long amount = (long)monarch.XPBonusTick * totalXp;                    
+                    long amount = (long)monarch.XPBonusTick * totalXp;
 
-                    GrantXP(amount, XpType.Admin, ShareType.None);
+                    if (HardMode)
+                        GrantXP(amount, XpType.Admin, ShareType.None);
+                    else
+                        EarnXP(amount, XpType.Admin, ShareType.None);
                     //Session.Network.EnqueueSend(new GameMessageSystemChat($"You gained {amount} XP from your allegiances quest point specialization!", ChatMessageType.System));
                 }
 
                 if (monarch.LXPBonusTick.HasValue && AvailableLuminance != null)
                 {
                     long amount = (long)monarch.LXPBonusTick * 5;
-                    GrantLuminance(amount, XpType.Admin, ShareType.None);
+                    if (HardMode)
+                        GrantLuminance(amount, XpType.Admin, ShareType.None);
+                    else
+                        EarnLuminance(amount, XpType.Admin, ShareType.None);
                     //Session.Network.EnqueueSend(new GameMessageSystemChat($"You gained {amount} Luminance XP from your allegiances quest point specialization!", ChatMessageType.System));
                 }
 

@@ -23,11 +23,17 @@ namespace ACE.Server.WorldObjects
             {
                 var monarch = Allegiance.Monarch.Player;
 
-                if (monarch.LXPBonus.HasValue)
-                    allegianceBonusLXP = 0.05f * (float)monarch.LXPBonus;
+                if (monarch.LXPBonus.HasValue && !HardMode)
+                    allegianceBonusLXP = 0.05f * (float)monarch.XPBonus;
+
+                if (monarch.LXPBonus.HasValue && HardMode)
+                    allegianceBonusLXP = 0.08f * (float)monarch.XPBonus;
             }
 
             float achievementBonus = 1.0f + 0.03f * (float)AchievementCount; // 3% bonus per achievement point
+
+            if (HardMode)
+                achievementBonus = 1.0f + 0.05f * (float)AchievementCount; // 5% for hardmode
 
             // should this be passed upstream to fellowship?
             var enchantment = GetXPAndLuminanceModifier(xpType) + allegianceBonusLXP;
@@ -49,7 +55,15 @@ namespace ACE.Server.WorldObjects
                 Fellowship.SplitLuminance((ulong)amount, xpType, shareType, this);
             }
             else
+            {
+                if (HardMode)
+                {
+                    long reduceLumXP = (long)Math.Round(amount * 0.75f);
+                    amount -= reduceLumXP;
+                }
+
                 AddLuminance(amount, xpType);
+            }                
         }
 
         private void AddLuminance(long amount, XpType xpType)

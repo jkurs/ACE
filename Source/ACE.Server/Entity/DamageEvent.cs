@@ -364,7 +364,21 @@ namespace ACE.Server.Entity
             float dmgmod = 1.0f;
 
             if (attacker != playerAttacker && !(attacker is CombatPet))
-                dmgmod = (float)PropertyManager.GetDouble("monster_damage").Item;
+            {
+                dmgmod = (float)PropertyManager.GetDouble("monster_damage").Item;                
+
+                if (attacker.DamageBuff != null)
+                {
+                    if (attacker.DamageBuff > 0)
+                        dmgmod = (float)PropertyManager.GetDouble("monster_damage").Item + (float)attacker.DamageBuff;
+                }
+
+                if (playerDefender != null)
+                {
+                    if (playerDefender.HardMode)
+                        dmgmod += 5.00f;
+                }
+            }
 
             if (playerDefender != null)
             {

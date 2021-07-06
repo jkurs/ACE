@@ -413,6 +413,41 @@ namespace ACE.Entity.Enum.Properties
         TAC5                             = 9112,
         [ServerOnly]
         TAC6                             = 9113,
+
+        [ServerOnly]
+        Cleveled                         = 9114,
+        [ServerOnly]
+        SlingShot                        = 9115,
+        [ServerOnly]
+        HardMode                         = 9116,
+        [ServerOnly]
+        HardModeFirst                    = 9117,
+
+        [ServerOnly]
+        HMLV1                              = 9118,
+        [ServerOnly]
+        HMLV2                              = 9119,
+        [ServerOnly]
+        HMLV3                              = 9120,
+        [ServerOnly]
+        HMLV4                              = 9121,
+        [ServerOnly]
+        HMLV5                              = 9122,
+        [ServerOnly]
+        HMLV6                              = 9123,
+
+        [ServerOnly]
+        HMENL1                             = 9124,
+        [ServerOnly]
+        HMENL2                             = 9125,
+        [ServerOnly]
+        HMENL3                             = 9126,
+        [ServerOnly]
+        HMENL4                             = 9127,
+        [ServerOnly]
+        HMENL5                             = 9128,
+        [ServerOnly]
+        HMENL6                             = 9129,
     }
 
     public static class PropertyBoolExtensions

@@ -38,7 +38,13 @@ namespace ACE.Entity.Enum.Properties
         [ServerOnly]
         BankedPyreals         = 9005,
         [ServerOnly]
-        BankedLuminance       = 9006
+        BankedLuminance       = 9006,
+        [ServerOnly]
+        CreatureExperience    = 9007,
+        [ServerOnly]
+        CreatureRequiredXpToLevel = 9008,
+        [ServerOnly]
+        CreatureXPRemainder = 9009,
     }
 
     public static class PropertyInt64Extensions

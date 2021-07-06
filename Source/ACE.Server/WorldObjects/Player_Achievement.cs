@@ -105,6 +105,12 @@ namespace ACE.Server.WorldObjects
 
             //TOTAL ACHIEVEMENTS
             CheckTotalAchievements(player);
+
+            //CHECK PLAYER LEVELS IN HARDMODE
+            CheckHardModeLevels(player);
+
+            //CHECK ENLIGHTENMENTS IN HARDMODE
+            CheckHMEnl(player);
         }
 
         public static void CheckHP(Player player)
@@ -1195,6 +1201,138 @@ namespace ACE.Server.WorldObjects
                     player.AchievementCount++;
                     player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.TAC6, true);
                     PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has obtained 102 total Achievements!!", ChatMessageType.WorldBroadcast));
+                }
+            }
+        }
+
+        public static void CheckHardModeLevels(Player player)
+        {
+            if (player.HardMode && !player.HardModeFirst)
+            {
+                if (!player.HMLV1)
+                {
+                    if (player.Level >= 50)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMLV1, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached level 50 in Hardmode!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMLV2)
+                {
+                    if (player.Level >= 150)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMLV2, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached level 150 in Hardmode!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMLV3)
+                {
+                    if (player.Level >= 275)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMLV3, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached level 275 in Hardmode!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMLV4)
+                {
+                    if (player.Level >= 400)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMLV4, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached level 400 in Hardmode!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMLV5)
+                {
+                    if (player.Level >= 700)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMLV5, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached level 700 in Hardmode!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMLV6)
+                {
+                    if (player.Level >= 1000)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMLV6, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached level 1,000 in Hardmode!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+            }
+        }
+
+        public static void CheckHMEnl(Player player)
+        {
+            if (player.HardMode && !player.HardModeFirst)
+            {
+                if (!player.HMENL1)
+                {
+                    if (player.Enlightenment >= 10)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMENL1, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached a total of 10 Enlightenments in Hardmode!!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMENL2)
+                {
+                    if (player.Enlightenment >= 50)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMENL2, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached a total of 50 Enlightenments in Hardmode!!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMENL3)
+                {
+                    if (player.Enlightenment >= 100)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMENL3, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached a total of 100 Enlightenments in Hardmode!!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMENL4)
+                {
+                    if (player.Enlightenment >= 150)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMENL4, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached a total of 150 Enlightenments in Hardmode!!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMENL5)
+                {
+                    if (player.Enlightenment >= 250)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMENL5, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached a total of 250 Enlightenments in Hardmode!!!", ChatMessageType.WorldBroadcast));
+                    }
+                }
+
+                if (!player.HMENL6)
+                {
+                    if (player.Enlightenment >= 350)
+                    {
+                        player.AchievementCount++;
+                        player.SetProperty(ACE.Entity.Enum.Properties.PropertyBool.HMENL6, true);
+                        PlayerManager.BroadcastToAll(new GameMessageSystemChat($"[ACHIEVEMENT] {player.Name} has reached a total of 350 Enlightenments in Hardmode!!!", ChatMessageType.WorldBroadcast));
+                    }
                 }
             }
         }

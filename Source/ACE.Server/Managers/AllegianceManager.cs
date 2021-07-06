@@ -272,8 +272,8 @@ namespace ACE.Server.Managers
             var received = (factor1 + factor2 * (leadership / SkillCap) * (1.0f + (timeReal / RealCap) * (timeGame / GameCap))) * 0.01f;
             var passup = generated * received;
 
-            var generatedAmount = (uint)(amount * generated);
-            var passupAmount = (uint)(amount * passup);
+            var generatedAmount = (long)(amount * generated);
+            var passupAmount = (long)(amount * passup);
 
             /*Console.WriteLine("---");
             Console.WriteLine("AllegianceManager.PassXP(" + amount + ")");
@@ -293,8 +293,8 @@ namespace ACE.Server.Managers
                 //patron.CPCached += passupAmount;
                 //patron.CPPoolToUnload += passupAmount;
 
-                vassal.AllegianceXPGenerated += generatedAmount;
-                patron.AllegianceXPCached += passupAmount;
+                vassal.AllegianceXPGenerated += (ulong)generatedAmount;
+                patron.AllegianceXPCached += (ulong)passupAmount;
 
                 var onlinePatron = PlayerManager.GetOnlinePlayer(patron.Guid);
                 if (onlinePatron != null)

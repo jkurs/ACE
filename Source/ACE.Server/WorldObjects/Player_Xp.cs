@@ -36,14 +36,23 @@ namespace ACE.Server.WorldObjects
             {
                 var monarch = Allegiance.Monarch.Player;
 
-                if (monarch.XPBonus.HasValue)
+                if (monarch.XPBonus.HasValue && !HardMode)
                     allegianceBonusXP = 0.05f * (float)monarch.XPBonus;
+
+                if (monarch.XPBonus.HasValue && HardMode)
+                    allegianceBonusXP = 0.08f * (float)monarch.XPBonus;
             }
 
             //additive enlightenment bonus with enchantments.
             var enlightenBonus = 0.25f * Enlightenment; // 25% XP bonus per enlightenment
 
+            if (HardMode)
+                enlightenBonus = 1.00f * Enlightenment; // 100% for hardmode
+
             float achievementBonus = 1.0f + 0.03f * (float)AchievementCount; // 3% bonus per achievement point
+
+            if (HardMode)
+                achievementBonus = 1.0f + 0.05f * (float)AchievementCount; // 5% for hardmode
 
             // should this be passed upstream to fellowship / allegiance?
             var enchantment = GetXPAndLuminanceModifier(xpType) + allegianceBonusXP + enlightenBonus;
@@ -69,13 +78,20 @@ namespace ACE.Server.WorldObjects
         /// <param name="xpType">The source of the XP being granted</param>
         /// <param name="shareable">If TRUE, this XP can be shared with fellowship members</param>
         public void GrantXP(long amount, XpType xpType, ShareType shareType = ShareType.All)
-        {
+        {       
+
             if (Fellowship != null && Fellowship.ShareXP && shareType.HasFlag(ShareType.Fellowship)/*(xpType == XpType.Emote || xpType == XpType.Fellowship || xpType == XpType.Kill || xpType == XpType.Quest)*/)
             {
                 // this will divy up the XP, and re-call this function
                 // with ShareType.Fellowship removed
                 Fellowship.SplitXp((ulong)amount, xpType, shareType, this);
                 return;
+            }
+
+            if (HardMode)
+            {
+                long reduceXP = (long)Math.Round(amount * 0.10f);
+                amount = reduceXP;
             }
 
             XPGained = amount;
@@ -86,8 +102,16 @@ namespace ACE.Server.WorldObjects
             // for passing XP up the allegiance chain,
             // this function is only called at the very beginning, to start the process.
             if (shareType.HasFlag(ShareType.Allegiance))
-                UpdateXpAllegiance(amount);
+            {
+                /*if (HardMode)
+                {
+                    // reduce passup xp by 75%
+                    long reducePassupXP = (long)Math.Round(amount * 0.90f);
+                    amount -= reducePassupXP;
+                }*/
 
+                UpdateXpAllegiance(amount);
+            }
             // only certain types of XP are granted to items
             if (xpType == XpType.Kill || xpType == XpType.Quest)
                 GrantItemXP(amount);

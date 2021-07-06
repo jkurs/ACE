@@ -33,6 +33,36 @@ namespace ACE.Server.Command.Handlers
             CommandHandlerHelper.WriteOutputInfo(session, $"Current world population: {PlayerManager.GetOnlineCount():N0}", ChatMessageType.Broadcast);
         }
 
+        // hardmode
+        [CommandHandler("hardmode", AccessLevel.Player, CommandHandlerFlag.None, 0,
+            "Enables Hardmode",
+            "")]
+        public static void HandleHardmode(Session session, params string[] parameters)
+        {
+            if (!session.Player.HardMode)
+                HandleHardMode(session, false);
+            else
+            {
+                session.Network.EnqueueSend(new GameMessageSystemChat($"You're already in Hardmode", ChatMessageType.Broadcast));
+                return;
+            }
+        }
+
+        public static void HandleHardMode(Session session, bool confirmed)
+        {
+            if (!confirmed)
+            {
+                var msg = $"WARNING!!!!!! This action is irreversible!! You will be returned to level 1, lose ALL your enlightenment levels (you will keep your achievements), and earn 75% less XP/Lum from ALL sources, this includes allegiance passup AND fellowships. Monsters will deal 6.5x Physical damage to you and 6.2x magic damage to you. This is intended to provide an even harsher and difficult experience! !!DO NOT DO THIS UNLESS YOU ARE ABSOLUTELY SURE!!";
+                session.Player.ConfirmationManager.EnqueueSend(new Confirmation_Custom(session.Player.Guid, () => HandleHardMode(session, true)), msg);
+                return;
+            }
+            session.Player.SetProperty(PropertyBool.HardModeFirst, true);
+            session.Player.SetProperty(PropertyBool.HardMode, true);
+            Enlightenment.HandleEnlightenment(session.Player, session.Player);
+            session.Player.Enlightenment = 0;
+            session.Network.EnqueueSend(new GameMessageSystemChat($"[HARDMODE] You have entered Hardmode. Goodluck, don't expect it to be easy!", ChatMessageType.Broadcast));
+        }
+
         [CommandHandler("bank", AccessLevel.Player, CommandHandlerFlag.None,
             "Handles all Bank operations.",
             "")]
@@ -399,6 +429,26 @@ namespace ACE.Server.Command.Handlers
                             {
                                 session.Player.SetProperty(PropertyFloat.BankCommandTimer, Time.GetFutureUnixTime(10));
                                 long amountWithdrawn = 0;
+
+
+                                if (amt >= 250000)
+                                {
+                                    var mmd = WorldObjectFactory.CreateNewWorldObject(20630);
+                                    var mmds = amt / 250000f;
+                                    mmd.SetStackSize((int)mmds);
+
+                                    if (session.Player.GetFreeInventorySlots(true) < 10 || !session.Player.HasEnoughBurdenToAddToInventory(mmd))
+                                    {
+                                        session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You do not have enough pack space or you are overburdened.", ChatMessageType.Broadcast));
+                                        return;
+                                    }
+
+                                    amt -= (long)mmds * 250000;
+                                    amountWithdrawn += (long)mmds * 250000;
+                                    session.Player.TryCreateInInventoryWithNetworking(mmd);
+                                    session.Player.BankedPyreals -= (long)mmds * 250000;
+                                    session.Network.EnqueueSend(new GameMessageSystemChat($"[BANK] You withdrew {Math.Floor(mmds)} MMDS.", ChatMessageType.Broadcast));
+                                }
 
                                 for (var i = amt; i >= 25000; i -= 25000)
                                 {
@@ -1059,11 +1109,78 @@ namespace ACE.Server.Command.Handlers
             else
                 session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 102 total Achievements", ChatMessageType.Help));
 
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Hardmode Player Level Total:", ChatMessageType.System));
+
+            if (session.Player.HMLV1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach Level 50 in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach Level 50 in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMLV2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach Level 150 in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach Level 150 in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMLV3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach Level 275 in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach Level 275 in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMLV4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach Level 400 in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach Level 400 in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMLV5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach Level 700 in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach Level 700 in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMLV6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach Level 1,000 in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach Level 1,000 in Hardmode", ChatMessageType.Help));
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"Hardmode Enlightenment Total:", ChatMessageType.System));
+
+            if (session.Player.HMENL1)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 Enlightenments in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 1: Reach 10 Enlightenments in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMENL2)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 50 Enlightenments in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 2: Reach 50 Enlightenments in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMENL3)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 100 Enlightenments in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 3: Reach 100 Enlightenments in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMENL4)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 150 Enlightenments in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 4: Reach 150 Enlightenments in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMENL5)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 250 Enlightenments in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 5: Reach 250 Enlightenments in Hardmode", ChatMessageType.Help));
+
+            if (session.Player.HMENL6)
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 350 Enlightenments in Hardmode", ChatMessageType.x1B));
+            else
+                session.Network.EnqueueSend(new GameMessageSystemChat($"Tier 6: Reach 350 Enlightenments in Hardmode", ChatMessageType.Help));
+
             session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
 
             var achievementBonusTotal = session.Player.AchievementCount * 3;
 
-            session.Network.EnqueueSend(new GameMessageSystemChat($"You have completed {session.Player.AchievementCount} out of 102 achievements", ChatMessageType.Broadcast));
+            if (session.Player.HardMode)
+                achievementBonusTotal = session.Player.AchievementCount * 5;
+
+            session.Network.EnqueueSend(new GameMessageSystemChat($"You have completed {session.Player.AchievementCount} out of 114 achievements", ChatMessageType.Broadcast));
             session.Network.EnqueueSend(new GameMessageSystemChat($"Your achievements are earning you {achievementBonusTotal}% bonus XP/Lum! (Multiplicative)", ChatMessageType.Broadcast));
             session.Network.EnqueueSend(new GameMessageSystemChat($"---------------------------", ChatMessageType.Broadcast));
 

@@ -688,7 +688,9 @@ namespace ACE.Entity.Enum.Properties
         [ServerOnly]
         VitalityAug                             = 9044,
         [ServerOnly]
-        ArmorManaAug                            = 9045
+        ArmorManaAug                            = 9045,
+        [ServerOnly]
+        CreatureOriginalLevel                   = 9046
     }
 
     public static class PropertyIntExtensions

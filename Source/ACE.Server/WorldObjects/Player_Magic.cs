@@ -1087,6 +1087,18 @@ namespace ACE.Server.WorldObjects
                     if (targetPlayer == null)
                         OnAttackMonster(targetCreature);
 
+                    if (targetPlayer != null)
+                    {
+                        if (targetPlayer != this)
+                        {
+                            if ((targetPlayer.HardMode && !HardMode) || (!targetPlayer.HardMode && HardMode))
+                            {
+                                Session.Network.EnqueueSend(new GameMessageSystemChat($"You fail to affect {targetCreature.Name} with {spell.Name} because you both are not in hardmode.", ChatMessageType.Magic));
+                                break;
+                            }
+                        }
+                    }
+
                     if (TryResistSpell(target, spell, itemCaster))
                         break;
 
@@ -1127,6 +1139,18 @@ namespace ACE.Server.WorldObjects
 
                         if (TryResistSpell(target, spell, itemCaster))
                             break;
+
+                        if (targetPlayer != null)
+                        {
+                            if (targetPlayer != this)
+                            {
+                                if ((targetPlayer.HardMode && !HardMode) || (!targetPlayer.HardMode && HardMode))
+                                {
+                                    Session.Network.EnqueueSend(new GameMessageSystemChat($"You fail to affect {targetCreature.Name} with {spell.Name} because you both are not in hardmode.", ChatMessageType.Magic));
+                                    break;
+                                }
+                            }
+                        }
 
                         if (targetCreature != null && targetCreature.NonProjectileMagicImmune)
                         {
@@ -1171,6 +1195,18 @@ namespace ACE.Server.WorldObjects
                     break;
 
                 case MagicSchool.ItemEnchantment:
+
+                    if (targetPlayer != null)
+                    {
+                        if (targetPlayer != this)
+                        {
+                            if ((targetPlayer.HardMode && !HardMode) || (!targetPlayer.HardMode && HardMode))
+                            {
+                                Session.Network.EnqueueSend(new GameMessageSystemChat($"You fail to affect {targetCreature.Name} with {spell.Name} because you both are not in hardmode.", ChatMessageType.Magic));
+                                break;
+                            }
+                        }
+                    }
 
                     TryCastItemEnchantment_WithRedirects(spell, target, itemCaster);
 

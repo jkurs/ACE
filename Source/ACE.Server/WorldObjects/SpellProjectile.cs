@@ -573,6 +573,19 @@ namespace ACE.Server.WorldObjects
 
                 finalDamage *= (float)PropertyManager.GetDouble("monster_magic").Item;
 
+
+                if (sourceCreature.DamageBuff != null)
+                {
+                    if (sourceCreature.DamageBuff > 0)
+                        finalDamage *= (float)PropertyManager.GetDouble("monster_magic").Item + (float)sourceCreature.DamageBuff;
+                }
+
+                if (targetPlayer != null)
+                {
+                    if (targetPlayer.HardMode)
+                        finalDamage *= 5.00f;
+                }
+
                 /*if (targetPlayer != null)
                     targetPlayer.Session.Network.EnqueueSend(new GameMessageSystemChat($"[MAGICAL] old {Math.Round(olddmg):N0} // new {Math.Round(finalDamage):N0} @ {PropertyManager.GetDouble("monster_magic").Item}", ChatMessageType.Broadcast));*/
             }

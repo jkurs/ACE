@@ -510,6 +510,12 @@ namespace ACE.Server.Entity
                 {
                     var fellowXpType = player == member ? XpType.Quest : XpType.Fellowship;
 
+                    /*if (member.HardMode)
+                    {
+                        long reduceFellowQuestXP = (long)Math.Round(perAmount * 0.75f);
+                        perAmount -= reduceFellowQuestXP;
+                    }*/
+
                     member.GrantXP(perAmount, fellowXpType, shareType);
                 }
             }
@@ -525,6 +531,12 @@ namespace ACE.Server.Entity
                     var shareAmount = (ulong)Math.Round(totalAmount * GetDistanceScalar(player, member, xpType));
 
                     var fellowXpType = player == member ? xpType : XpType.Fellowship;
+
+                    /*if (member.HardMode)
+                    {
+                        long reduceFellowEvenShareXP = (long)Math.Round(shareAmount * 0.75f);
+                        shareAmount -= (ulong)reduceFellowEvenShareXP;
+                    }*/
 
                     member.GrantXP((long)shareAmount, fellowXpType, shareType);
                 }
@@ -545,6 +557,12 @@ namespace ACE.Server.Entity
                     var playerTotal = (ulong)Math.Round(amount * levelXPScale * GetDistanceScalar(player, member, xpType));
 
                     var fellowXpType = player == member ? xpType : XpType.Fellowship;
+
+                    /*if (member.HardMode)
+                    {
+                        long reduceFellowLevelShareXP = (long)Math.Round(playerTotal * 0.75f);
+                        playerTotal -= (ulong)reduceFellowLevelShareXP;
+                    }*/
 
                     member.GrantXP((long)playerTotal, fellowXpType, shareType);
                 }
@@ -584,6 +602,12 @@ namespace ACE.Server.Entity
                 foreach (var member in inRange)
                 {
                     var fellowXpType = player == member ? xpType : XpType.Fellowship;
+
+                    /*if (member.HardMode)
+                    {
+                        long reduceFellowLumXP = (long)Math.Round(perAmount * 0.75f);
+                        perAmount -= reduceFellowLumXP;
+                    }*/
 
                     member.GrantLuminance(perAmount, fellowXpType, shareType);
                 }

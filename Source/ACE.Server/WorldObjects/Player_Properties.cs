@@ -1998,6 +1998,81 @@ namespace ACE.Server.WorldObjects
             set { if (!value.HasValue) RemoveProperty(PropertyInt64.BankedLuminance); else SetProperty(PropertyInt64.BankedLuminance, value.Value); }
         }
 
+        public bool HardMode
+        {
+            get => GetProperty(PropertyBool.HardMode) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HardMode); else SetProperty(PropertyBool.HardMode, value); }
+        }
+
+        public bool HardModeFirst
+        {
+            get => GetProperty(PropertyBool.HardModeFirst) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HardModeFirst); else SetProperty(PropertyBool.HardModeFirst, value); }
+        }
+
+        public bool HMLV1
+        {
+            get => GetProperty(PropertyBool.HMLV1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMLV1); else SetProperty(PropertyBool.HMLV1, value); }
+        }
+        public bool HMLV2
+        {
+            get => GetProperty(PropertyBool.HMLV2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMLV2); else SetProperty(PropertyBool.HMLV2, value); }
+        }
+        public bool HMLV3
+        {
+            get => GetProperty(PropertyBool.HMLV3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMLV3); else SetProperty(PropertyBool.HMLV3, value); }
+        }
+        public bool HMLV4
+        {
+            get => GetProperty(PropertyBool.HMLV4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMLV4); else SetProperty(PropertyBool.HMLV4, value); }
+        }
+        public bool HMLV5
+        {
+            get => GetProperty(PropertyBool.HMLV5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMLV5); else SetProperty(PropertyBool.HMLV5, value); }
+        }
+        public bool HMLV6
+        {
+            get => GetProperty(PropertyBool.HMLV6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMLV6); else SetProperty(PropertyBool.HMLV6, value); }
+        }
+
+
+        public bool HMENL1
+        {
+            get => GetProperty(PropertyBool.HMENL1) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMENL1); else SetProperty(PropertyBool.HMENL1, value); }
+        }
+        public bool HMENL2
+        {
+            get => GetProperty(PropertyBool.HMENL2) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMENL2); else SetProperty(PropertyBool.HMENL2, value); }
+        }
+        public bool HMENL3
+        {
+            get => GetProperty(PropertyBool.HMENL3) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMENL3); else SetProperty(PropertyBool.HMENL3, value); }
+        }
+        public bool HMENL4
+        {
+            get => GetProperty(PropertyBool.HMENL4) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMENL4); else SetProperty(PropertyBool.HMENL4, value); }
+        }
+        public bool HMENL5
+        {
+            get => GetProperty(PropertyBool.HMENL5) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMENL5); else SetProperty(PropertyBool.HMENL5, value); }
+        }
+        public bool HMENL6
+        {
+            get => GetProperty(PropertyBool.HMENL6) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.HMENL6); else SetProperty(PropertyBool.HMENL6, value); }
+        }
+
         public double? LastPortalTeleportTimestamp
         {
             get => GetProperty(PropertyFloat.LastPortalTeleportTimestamp);

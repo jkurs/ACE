@@ -363,6 +363,55 @@ namespace ACE.Server.WorldObjects
             get => GetProperty(PropertyBool.UpgradedUber1) ?? false;
             set { if (!value) RemoveProperty(PropertyBool.UpgradedUber1); else SetProperty(PropertyBool.UpgradedUber1, value); }
         }
+
+        public int? CreatureOriginalLevel
+        {
+            get => GetProperty(PropertyInt.CreatureOriginalLevel);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt.CreatureOriginalLevel); else SetProperty(PropertyInt.CreatureOriginalLevel, value.Value); }
+        }
+
+        public bool Cleveled
+        {
+            get => GetProperty(PropertyBool.Cleveled) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.Cleveled); else SetProperty(PropertyBool.Cleveled, value); }
+        }
+
+        public bool SlingShot
+        {
+            get => GetProperty(PropertyBool.SlingShot) ?? false;
+            set { if (!value) RemoveProperty(PropertyBool.SlingShot); else SetProperty(PropertyBool.SlingShot, value); }
+        }
+
+        public long? CreatureExperience
+        {
+            get => GetProperty(PropertyInt64.CreatureExperience);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt64.CreatureExperience); else SetProperty(PropertyInt64.CreatureExperience, value.Value); }
+        }
+
+        public long? CreatureRequiredXpToLevel
+        {
+            get => GetProperty(PropertyInt64.CreatureRequiredXpToLevel);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt64.CreatureRequiredXpToLevel); else SetProperty(PropertyInt64.CreatureRequiredXpToLevel, value.Value); }
+        }
+
+        public long? CreatureXPRemainder
+        {
+            get => GetProperty(PropertyInt64.CreatureXPRemainder);
+            set { if (!value.HasValue) RemoveProperty(PropertyInt64.CreatureXPRemainder); else SetProperty(PropertyInt64.CreatureXPRemainder, value.Value); }
+        }
+
+        public double? SlingShotChance
+        {
+            get => GetProperty(PropertyFloat.SlingShotChance);
+            set { if (!value.HasValue) RemoveProperty(PropertyFloat.SlingShotChance); else SetProperty(PropertyFloat.SlingShotChance, value.Value); }
+        }
+
+        public double? DamageBuff
+        {
+            get => GetProperty(PropertyFloat.DamageBuff);
+            set { if (!value.HasValue) RemoveProperty(PropertyFloat.DamageBuff); else SetProperty(PropertyFloat.DamageBuff, value.Value); }
+        }
+
         public FactionBits Society => Faction1Bits ?? FactionBits.None;
     }
 }

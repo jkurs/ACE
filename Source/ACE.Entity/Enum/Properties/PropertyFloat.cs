@@ -222,7 +222,11 @@ namespace ACE.Entity.Enum.Properties
         [ServerOnly]
         AllegianceLKeyTimer            = 8020,
         [ServerOnly]
-        BankCommandTimer               = 8021
+        BankCommandTimer               = 8021,
+        [ServerOnly]
+        SlingShotChance                = 8022,
+        [ServerOnly]
+        DamageBuff                     = 8023
     }
 
     public static class PropertyFloatExtensions

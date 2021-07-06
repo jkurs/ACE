@@ -177,6 +177,49 @@ namespace ACE.Server.WorldObjects
             if (topDamager != null)
                 KillerId = topDamager.Guid.Full;
 
+            
+            if (topDamager != null)
+            {
+                //ensures that it only ever levels a non-player creature up
+                if (!topDamager.IsPlayer)
+                {
+                    var creature = topDamager.TryGetAttacker() as Creature;
+
+                    if (creature != null)
+                    {
+                        var leveldiff = Math.Abs((double)(Level - creature.Level) * 1.00f);
+                        bool allowxp = false;
+
+                        if (leveldiff <= 500)
+                            allowxp = true;
+
+                        if (creature.Level >= 200)
+                            allowxp = true;
+
+                        if (allowxp)
+                        {
+                            if (!creature.Cleveled)
+                            {
+                                creature.SetProperty(PropertyInt.CreatureOriginalLevel, (int)creature.Level);
+
+                                long creatureXPGained = (int)Level * 10;
+                                long requiredXP = (int)creature.CreatureOriginalLevel * 100;
+
+                                creature.SetProperty(PropertyBool.Cleveled, true);
+                                creature.SetProperty(PropertyInt64.CreatureExperience, creatureXPGained);
+                                creature.SetProperty(PropertyInt64.CreatureRequiredXpToLevel, requiredXP);
+                            }
+                            else
+                            {
+                                long creatureXPGained = (int)Level * 10;
+                                creature.CreatureExperience += creatureXPGained;
+                            }
+                        }
+                        else
+                            Session.Network.EnqueueSend(new GameMessageSystemChat($"[CREATURE] You are too many levels above or below to grant the monster xp [diff:({leveldiff})]", ChatMessageType.x1D));
+                    }
+                }
+            }
             // broadcast death animation
             var deathAnim = new Motion(MotionStance.NonCombat, MotionCommand.Dead);
             EnqueueBroadcastMotion(deathAnim);

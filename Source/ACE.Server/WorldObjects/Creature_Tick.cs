@@ -47,6 +47,398 @@ namespace ACE.Server.WorldObjects
                     player.Session.Network.EnqueueSend(new GameMessageSystemChat($"Its lifespan finished, your {expireItem.Name} crumbles to dust.", ChatMessageType.Broadcast));
             }
 
+            var targetPlayer = AttackTarget as Player;
+
+            if (SlingShot && PlayersInRange(10) && IsAwake && targetPlayer != null)
+            {
+                //select element
+                var element = ThreadSafeRandom.Next(1, 7);                
+
+                var maxChance =  100.00f - SlingShotChance;
+                var chance = ThreadSafeRandom.Next(0.00f, 100.00f);
+
+                if (chance >= maxChance)
+                {
+                    switch (element)
+                    {
+                        case 1:
+
+                            if (Level < 25)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FlameArc1), this);
+
+                            if (Level >= 25 && Level <= 39)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FlameArc2), this);
+
+                            if (Level >= 40 && Level <= 69)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FlameArc3), this);
+
+                            if (Level >= 70 && Level <= 99)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FlameArc4), this);
+
+                            if (Level >= 100 && Level <= 129)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FlameArc5), this);
+
+                            if (Level >= 130 && Level <= 149)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FlameArc6), this);
+
+                            if (Level >= 150 && Level <= 199)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FlameArc7), this);
+
+                            if (Level >= 200)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FlameArc8), this);
+
+                            break;
+                        case 2:
+                            if (Level < 25)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FrostArc1), this);
+
+                            if (Level >= 25 && Level <= 39)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FrostArc2), this);
+
+                            if (Level >= 40 && Level <= 69)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FrostArc3), this);
+
+                            if (Level >= 70 && Level <= 99)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FrostArc4), this);
+
+                            if (Level >= 100 && Level <= 129)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FrostArc5), this);
+
+                            if (Level >= 130 && Level <= 149)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FrostArc6), this);
+
+                            if (Level >= 150 && Level <= 199)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FrostArc7), this);
+
+                            if (Level >= 200)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.FrostArc8), this);
+                            break;
+                        case 3:
+                            if (Level < 25)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.LightningArc1), this);
+
+                            if (Level >= 25 && Level <= 39)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.LightningArc2), this);
+
+                            if (Level >= 40 && Level <= 69)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.LightningArc3), this);
+
+                            if (Level >= 70 && Level <= 99)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.LightningArc4), this);
+
+                            if (Level >= 100 && Level <= 129)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.LightningArc5), this);
+
+                            if (Level >= 130 && Level <= 149)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.LightningArc6), this);
+
+                            if (Level >= 150 && Level <= 199)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.LightningArc7), this);
+
+                            if (Level >= 200)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.LightningArc8), this);
+                            break;
+                        case 4:
+                            if (Level < 25)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.AcidArc1), this);
+
+                            if (Level >= 25 && Level <= 39)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.AcidArc2), this);
+
+                            if (Level >= 40 && Level <= 69)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.AcidArc3), this);
+
+                            if (Level >= 70 && Level <= 99)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.AcidArc4), this);
+
+                            if (Level >= 100 && Level <= 129)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.AcidArc5), this);
+
+                            if (Level >= 130 && Level <= 149)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.AcidArc6), this);
+
+                            if (Level >= 150 && Level <= 199)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.AcidArc7), this);
+
+                            if (Level >= 200)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.AcidArc8), this);
+                            break;
+                        case 5:
+                            if (Level < 25)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ShockArc1), this);
+
+                            if (Level >= 25 && Level <= 39)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ShockArc2), this);
+
+                            if (Level >= 40 && Level <= 69)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ShockArc3), this);
+
+                            if (Level >= 70 && Level <= 99)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ShockArc4), this);
+
+                            if (Level >= 100 && Level <= 129)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ShockArc5), this);
+
+                            if (Level >= 130 && Level <= 149)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ShockArc6), this);
+
+                            if (Level >= 150 && Level <= 199)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ShockArc7), this);
+
+                            if (Level >= 200)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ShockArc8), this);
+                            break;
+                        case 6:
+                            if (Level < 25)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ForceArc1), this);
+
+                            if (Level >= 25 && Level <= 39)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ForceArc2), this);
+
+                            if (Level >= 40 && Level <= 69)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ForceArc3), this);
+
+                            if (Level >= 70 && Level <= 99)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ForceArc4), this);
+
+                            if (Level >= 100 && Level <= 129)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ForceArc5), this);
+
+                            if (Level >= 130 && Level <= 149)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ForceArc6), this);
+
+                            if (Level >= 150 && Level <= 199)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ForceArc7), this);
+
+                            if (Level >= 200)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.ForceArc8), this);
+                            break;
+                        case 7:
+                            if (Level < 25)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.BladeArc1), this);
+
+                            if (Level >= 25 && Level <= 39)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.BladeArc2), this);
+
+                            if (Level >= 40 && Level <= 69)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.BladeArc3), this);
+
+                            if (Level >= 70 && Level <= 99)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.BladeArc4), this);
+
+                            if (Level >= 100 && Level <= 129)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.BladeArc5), this);
+
+                            if (Level >= 130 && Level <= 149)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.BladeArc6), this);
+
+                            if (Level >= 150 && Level <= 199)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.BladeArc7), this);
+
+                            if (Level >= 200)
+                                WarMagic(targetPlayer, new Server.Entity.Spell(SpellId.BladeArc8), this);
+                            break;
+                    }
+                }
+            }
+
+
+            if (Cleveled)
+            {
+                bool leveled = false;
+
+                for (var i = CreatureExperience; i >= CreatureRequiredXpToLevel; i -= CreatureRequiredXpToLevel)
+                {
+                    //indicates whether a mob has leveled up or not.
+
+                    if (!Name.Contains("[L]"))
+                    {
+                        string levelTag = $"[L] {Name}";
+                        Name = levelTag;
+                    }
+
+                    // grabs the remainder leftover from the previous levels XP gained to passover to the creatures next experience pool.
+                    var remainder = CreatureExperience - CreatureRequiredXpToLevel;
+                    CreatureExperience = remainder;
+
+                    //ensure no negatives here.
+                    if (CreatureExperience <= 0)
+                        CreatureExperience = 0;
+
+                    // sets the new xp requirement for a level for the creature.
+                    CreatureRequiredXpToLevel = ((int)Level * 100) * CreatureOriginalLevel;
+
+                    PlayParticleEffect(PlayScript.LevelUp, Guid);
+                    Level++;
+
+                    leveled = true;
+
+                    if (!Location.Indoors)
+                    {
+                        if (ObjScale != null)
+                            ObjScale += 0.005f;
+                    }
+
+                    var statbonusfromlevel1 = 0;
+                    var statbonusfromlevel2 = 0;
+                    var statbonusfromlevel3 = 0;
+                    var statbonusfromlevel4 = 0;
+                    var statbonusfromlevel5 = 0;
+                    var statbonusfromlevel6 = 0;
+                    var statmax = 0;
+
+                    // Max tiered stat increases based on level of creature
+                    if (Level < 25)
+                        statmax = 2;
+
+                    if (Level >= 25 && Level <= 39 )
+                        statmax = 4;
+
+                    if (Level >= 40 && Level <= 69)                    
+                        statmax = 6;
+
+                    if (Level >= 70 && Level <= 99)
+                        statmax = 10;
+
+                    if (Level >= 100)
+                        statmax = 15;
+
+                    statbonusfromlevel1 = ThreadSafeRandom.Next(0, statmax);
+                    statbonusfromlevel2 = ThreadSafeRandom.Next(0, statmax);
+                    statbonusfromlevel3 = ThreadSafeRandom.Next(0, statmax);
+                    statbonusfromlevel4 = ThreadSafeRandom.Next(0, statmax);
+                    statbonusfromlevel5 = ThreadSafeRandom.Next(0, statmax);
+                    statbonusfromlevel6 = ThreadSafeRandom.Next(0, statmax);
+
+                    Strength.StartingValue += (uint)statbonusfromlevel1;
+                    Endurance.StartingValue += (uint)statbonusfromlevel2;
+                    Coordination.StartingValue += (uint)statbonusfromlevel3;
+                    Quickness.StartingValue += (uint)statbonusfromlevel4;
+                    Focus.StartingValue += (uint)statbonusfromlevel5;
+                    Self.StartingValue += (uint)statbonusfromlevel6;
+
+                    Health.Current = Health.MaxValue;
+                    Stamina.Current = Stamina.MaxValue;
+                    Mana.Current = Mana.MaxValue;
+
+                    var abilitychance = ThreadSafeRandom.Next(0.00f, 100.00f);
+
+                    //25% on leveling to gain a buff/ability
+                    if (abilitychance <= 25.00f)
+                    {
+                        var abilityselect = ThreadSafeRandom.Next(1, 4);
+
+                        switch (abilityselect)
+                        {
+                            case 1:
+                                //slingshot Enables and adds 5% chance to launch a war projectile.
+
+                                var warMagic = GetCreatureSkill(Skill.WarMagic);
+
+                                warMagic.AdvancementClass = SkillAdvancementClass.Trained;                               
+
+                                if (warMagic.InitLevel <= 319)
+                                    warMagic.InitLevel = 320;
+
+                                if (!SlingShot)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyBool.SlingShot, true);
+
+                                if (SlingShotChance <= 0 || SlingShotChance == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.SlingShotChance, 0);
+
+                                //cap at 50% chance
+                                if (SlingShotChance < 50.00f)
+                                    SlingShotChance += 0.05f;
+
+                                if (SlingShotChance >= 50.00f)
+                                    SlingShotChance = 50.00f;
+
+                                string ability1 = $"[CREATURE] {Name} has gained the ability to Sling war spells at enemies by 5% from leveling up!";
+                                PlayerManager.BroadcastToAll(new GameMessageSystemChat(ability1, ChatMessageType.Broadcast));
+
+                                break;
+
+                            case 2:
+                                //resistancegain 5% resistance gain to all resistances
+                                if (ResistFire == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.ResistFire, 0);
+                                if (ResistCold == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.ResistCold, 0);
+                                if (ResistElectric == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.ResistElectric, 0);
+                                if (ResistAcid == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.ResistAcid, 0);
+                                if (ResistBludgeon == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.ResistBludgeon, 0);
+                                if (ResistPierce == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.ResistPierce, 0);
+                                if (ResistSlash == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.ResistSlash, 0);
+                                if (ResistNether == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.ResistNether, 0);
+
+                                if (ResistFire <= 49.95f)
+                                    ResistFire += 0.05f;
+                                if (ResistCold <= 49.95f)
+                                    ResistCold += 0.05f;
+                                if (ResistElectric <= 49.95f)
+                                    ResistElectric += 0.05f;
+                                if (ResistBludgeon <= 49.95f)
+                                    ResistBludgeon += 0.05f;
+                                if (ResistSlash <= 49.95f)
+                                    ResistSlash += 0.05f;
+                                if (ResistPierce <= 49.95f)
+                                    ResistPierce += 0.05f;
+                                if (ResistAcid <= 49.95f)
+                                    ResistAcid += 0.05f;
+                                if (ResistNether <= 49.95f)
+                                    ResistNether += 0.05f;
+
+                                string ability2 = $"[CREATURE] {Name} has raised its natural resistances by 5% from leveling up!";
+                                PlayerManager.BroadcastToAll(new GameMessageSystemChat(ability2, ChatMessageType.Broadcast));
+
+                                break;
+
+                            case 3:
+                                //damagebuff 5% damage increase.
+
+                                if (DamageBuff == null)
+                                    SetProperty(ACE.Entity.Enum.Properties.PropertyFloat.DamageBuff, 0);
+
+                                DamageBuff += 0.05f;
+
+                                string ability3 = $"[CREATURE] {Name} had its damage increased by 5% from leveling up!";
+                                PlayerManager.BroadcastToAll(new GameMessageSystemChat(ability3, ChatMessageType.Broadcast));
+
+                                break;
+
+                            case 4:
+                                //xpmodifier 25% increase of Base creature XP.
+                                var bonusXP = Math.Round((double)XpOverride * 0.25f);
+
+                                XpOverride += (int)bonusXP;
+
+                                string ability4 = $"[CREATURE] XP received from killing {Name} monster has increased by 25%";
+                                PlayerManager.BroadcastToAll(new GameMessageSystemChat(ability4, ChatMessageType.Broadcast));
+
+                                break;
+                        }
+                    }
+
+                    string msg = $"[CREATURE] {Name} has leveled up to {Level} from {Level - 1} New stats: STR +{statbonusfromlevel1}({Strength.StartingValue}) | END +{statbonusfromlevel2}({Endurance.StartingValue}) | COORD +{statbonusfromlevel3}({Coordination.StartingValue}) | QUICK +{statbonusfromlevel4}({Quickness.StartingValue}) | FOCUS +{statbonusfromlevel5}({Focus.StartingValue}) | SELF +{statbonusfromlevel6}({Self.StartingValue})";
+                    PlayerManager.BroadcastToAll(new GameMessageSystemChat(msg, ChatMessageType.Broadcast));
+                    string msg2 = $"[CREATURE] XP required to level: {CreatureExperience}/{CreatureRequiredXpToLevel}";
+                    PlayerManager.BroadcastToAll(new GameMessageSystemChat(msg2, ChatMessageType.Broadcast));
+                }
+
+                if (leveled)
+                {
+                    EnqueueBroadcastUpdateObject();
+                    leveled = false;
+                }
+            }
+
+
             if (this is CombatPet && Level >= 200 && !CombatPetUpgraded)
             {
                 if (PetOwner != null)

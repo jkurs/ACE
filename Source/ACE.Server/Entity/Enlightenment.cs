@@ -64,14 +64,21 @@ namespace ACE.Server.Entity
         {
             if (player.Level < 400)
             {
-                player.Session.Network.EnqueueSend(new GameMessageSystemChat($"You must be level 300 for enlightenment.", ChatMessageType.Broadcast));
+                if (player.HardModeFirst)
+                    return true;
+
+                player.Session.Network.EnqueueSend(new GameMessageSystemChat($"You must be level 400 for enlightenment.", ChatMessageType.Broadcast));
                 player.QuestManager.Erase("Trance1");
                 return false;
             }
 
             if (player.GetFreeInventorySlots() < 25)
             {
-                player.Session.Network.EnqueueSend(new GameMessageSystemChat($"You must have at least 25 free inventory slots in your main pack for enlightenment.", ChatMessageType.Broadcast));
+                if (player.HardModeFirst)
+                    player.Session.Network.EnqueueSend(new GameMessageSystemChat($"You must have at least 25 free inventory slots in your main pack to enter Hardmode.", ChatMessageType.Broadcast));
+                else
+                    player.Session.Network.EnqueueSend(new GameMessageSystemChat($"You must have at least 25 free inventory slots in your main pack for enlightenment.", ChatMessageType.Broadcast));
+
                 player.QuestManager.Erase("Trance1");
                 return false;
             }
@@ -312,9 +319,12 @@ namespace ACE.Server.Entity
             player.Enlightenment += 1;
             player.Session.Network.EnqueueSend(new GameMessagePrivateUpdatePropertyInt(player, PropertyInt.Enlightenment, player.Enlightenment));
 
-            player.SendMessage("You have become enlightened and view the world with new eyes.", ChatMessageType.Broadcast);
-            player.SendMessage("Your available skill credits have been adjusted.", ChatMessageType.Broadcast);
-            player.SendMessage("You have risen to a higher tier of enlightenment!", ChatMessageType.Broadcast);
+            if (!player.HardModeFirst)
+            {
+                player.SendMessage("You have become enlightened and view the world with new eyes.", ChatMessageType.Broadcast);
+                player.SendMessage("Your available skill credits have been adjusted.", ChatMessageType.Broadcast);
+                player.SendMessage("You have risen to a higher tier of enlightenment!", ChatMessageType.Broadcast);
+            }
 
             var lvl = "";
 
@@ -346,7 +356,12 @@ namespace ACE.Server.Entity
             if (player.Enlightenment > 5)
                 lvl = $"{player.Enlightenment}";
 
-            var msg = $"{player.Name} has achieved level {lvl} Enlightenment!";
+            var msg = "";
+            if (!player.HardModeFirst)
+                msg = $"{player.Name} has achieved level {lvl} Enlightenment!";
+            else
+                msg = $"{player.Name} has entered Hardmode!!";
+
             PlayerManager.BroadcastToAll(new GameMessageSystemChat(msg, ChatMessageType.WorldBroadcast));
             PlayerManager.LogBroadcastChat(Channel.AllBroadcast, null, msg);
 
@@ -354,6 +369,10 @@ namespace ACE.Server.Entity
             player.LastLevel = 1;
             player.TotalXpBeyond = null;
 
+            if (player.HardModeFirst && player.HasVitae)
+                player.EnchantmentManager.RemoveVitae();
+
+            player.SetProperty(PropertyBool.HardModeFirst, false);
             // +2 vitality
             // handled automatically via PropertyInt.Enlightenment * 2
 
